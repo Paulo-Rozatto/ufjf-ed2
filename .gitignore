@@ -1,0 +1,5 @@
+.vscode
+out/
+
+# ignorar arquivos dentro da pasta archive
+archive/*
