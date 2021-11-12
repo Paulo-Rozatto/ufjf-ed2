@@ -3,6 +3,8 @@
 #include <math.h>
 
 #define BUFFER_SIZE 102400
+// #define BUFFER_SIZE 142
+#define ROWS 3646473
 
 using namespace std;
 
@@ -34,36 +36,75 @@ bool writeID(char *buffer, int &pos, int length, fstream &file)
     int size = length - pos;
 
     if (size < 89)
+    {
         needsNextBuffer = true;
+    }
     else
+    {
         size = 89;
 
-    file.write((buffer + pos), size * sizeof(char));
-    pos += 90;
+        file.write((buffer + pos), size * sizeof(char));
+        pos += size + 1;
+    }
 
     return needsNextBuffer;
 }
 
-bool writeReview(char *buffer, int &pos, int length, fstream &file)
+bool writeReview(char *buffer, int &pos, int length, fstream &file, int &row)
 {
     bool needsNextBuffer = false;
-    char lookinFor = buffer[pos] == '\"' ? '\"' : ',';
-    int i;
+    int i = 0, size;
 
-    for (i = pos + 1; buffer[i] != lookinFor; i++)
+    if (buffer[pos] == '\"')
     {
-        if (i == length)
+        i = pos + 1;
+
+        while (true)
         {
-            needsNextBuffer = true;
-            break;
+            if (i == length)
+            {
+                needsNextBuffer = true;
+                break;
+            }
+
+            if (buffer[i] == '\"')
+            {
+                if (buffer[i + 1] == '\"')
+                {
+                    i++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            i++;
+        }
+        i++;
+    }
+    else
+    {
+        for (i += pos; buffer[i] != ','; i++)
+        {
+            if (i == length)
+            {
+                needsNextBuffer = true;
+                break;
+            }
         }
     }
+
     if (!needsNextBuffer)
     {
-        if (lookinFor == '\"')
-            i++;
+        size = i - pos;
+        file.write(reinterpret_cast<const char *>(&row), sizeof(row));
 
-        file.write(buffer + pos, (i - pos) * sizeof(char));
+        int aux = file.tellp();
+        file.seekp(row, file.beg);
+        file.write(reinterpret_cast<const char *>(&size), sizeof(size));
+        file.write(buffer + pos, size * sizeof(char));
+        row += size + sizeof(size);
+        file.seekp(aux, file.beg);
         pos = i + 1;
     }
 
@@ -85,7 +126,7 @@ bool writeUpVote(char *buffer, int &pos, int length, fstream &file)
     }
 
     upvote = toInt((buffer + pos), (i - pos));
-    file << upvote;
+    file.write(reinterpret_cast<const char *>(&upvote), sizeof(upvote));
     pos = i + 1;
     return needsNextBuffer;
 }
@@ -93,7 +134,7 @@ bool writeUpVote(char *buffer, int &pos, int length, fstream &file)
 bool writeVersion(char *buffer, int &pos, int length, fstream &file)
 {
     bool needsNextBuffer = false;
-    int i, numb;
+    int i, numb, count = 0;
 
     for (i = pos; buffer[i] != ','; i++)
     {
@@ -106,13 +147,22 @@ bool writeVersion(char *buffer, int &pos, int length, fstream &file)
         if (buffer[i] == '.')
         {
             numb = toInt((buffer + pos), (i - pos));
-            file << numb;
+            file.write(reinterpret_cast<const char *>(&numb), sizeof(numb));
             pos = i + 1;
+            count++;
         }
     }
-
-    numb = toInt((buffer + pos), (i - pos));
-    file << numb;
+    if (count == 2)
+    {
+        numb = toInt((buffer + pos), (i - pos));
+        file.write(reinterpret_cast<const char *>(&numb), sizeof(numb));
+    }
+    else
+    {
+        numb = 0;
+        for (int j = count; j < 3; j++)
+            file.write(reinterpret_cast<const char *>(&numb), sizeof(numb));
+    }
     pos = i + 1;
 
     return needsNextBuffer;
@@ -125,31 +175,43 @@ bool writeDate(char *buffer, int &pos, int length, fstream &file)
     int size = length - pos;
 
     if (size < 19)
+    {
         needsNextBuffer = true;
+    }
     else
+    {
         size = 19;
 
-    file.write((buffer + pos), size * sizeof(char));
-    pos += 20;
+        file.write((buffer + pos), size * sizeof(char));
+        pos += 20;
+    }
 
     return needsNextBuffer;
 }
 
+void readToBuffer(char *buffer, int &length, fstream &file, int &pos)
+{
+    file.seekg(0, file.end);
+    length = file.tellg();
+    length = length - pos;
+    file.seekg(pos, file.beg);
+
+    if (length > BUFFER_SIZE)
+        length = BUFFER_SIZE;
+
+    file.seekg(pos, file.beg);
+    file.read(buffer, length);
+}
+
 void process()
 {
-    fstream csv, bin, out;
+    fstream csv, out;
 
-    // csv.open("archive/tiktok_app_reviews.csv", ios::in);
-    csv.open("archive/test.txt", ios::in);
-    out.open("out/out.txt", ios::out);
-    // bin.open("archive/bin.bin", ios::in | ios::binary);
-    // char t[] = {'b'};
+    csv.open("archive/tiktok_app_reviews.csv", ios::in | ios::binary);
+    // csv.open("archive/test.txt", ios::in | ios::binary);
+    out.open("archive/bin.bin", ios::out | ios::binary);
 
-    // bin.seekg(4);
-    // // bin.write(t, sizeof(char));
-    // bin.read(t, sizeof(char));
-
-    if (!csv)
+    if (!csv.is_open())
     {
         cout << "Erro: Arquivo archive/tiktok_app_reviews.csv nao encontrado" << endl;
         csv.close();
@@ -158,7 +220,7 @@ void process()
 
     csv.seekg(0, csv.end);
     int length = csv.tellg();
-    csv.seekg(0, csv.beg);
+    csv.seekg(54, csv.beg);
 
     if (length > BUFFER_SIZE)
         length = BUFFER_SIZE;
@@ -167,17 +229,77 @@ void process()
 
     csv.read(buffer, length);
 
-    // out.write(buffer, 89 * sizeof(char));
+    char test = buffer[0];
 
-    int type = ID, pos = 0;
+    // id (89 char) + review position (1 int) + upvote (1 int) + version (3 int) + date (19 char)
+    const int ROW_SIZE = 89 * sizeof(char) + sizeof(int) + sizeof(int) + 3 * sizeof(int) + 19 * sizeof(char);
+    int rowPos = ROW_SIZE * ROWS;
+    int next = ID, pos = 0, filePos = 0;
+    bool needsNextBuffer;
 
-    writeID(buffer, pos, length, out);
-    writeReview(buffer, pos, length, out);
-    writeUpVote(buffer, pos, length, out);
-    writeVersion(buffer, pos, length, out);
-    writeDate(buffer, pos, length, out);
+    while (pos < length)
+    {
+        switch (next)
+        {
+        case ID:
+        {
+            needsNextBuffer = writeID(buffer, pos, length, out);
+            if (needsNextBuffer)
+                break;
 
-    cout << buffer[pos] << endl;
+            next = REVIEW;
+        }
+
+        case REVIEW:
+        {
+            needsNextBuffer = writeReview(buffer, pos, length, out, rowPos);
+            if (needsNextBuffer)
+                break;
+
+            next = UPVOTE;
+        }
+
+        case UPVOTE:
+        {
+            needsNextBuffer = writeUpVote(buffer, pos, length, out);
+            if (needsNextBuffer)
+                break;
+
+            next = VERSION;
+        }
+
+        case VERSION:
+        {
+            needsNextBuffer = writeVersion(buffer, pos, length, out);
+            if (needsNextBuffer)
+                break;
+
+            next = DATE;
+        }
+
+        case DATE:
+        {
+            needsNextBuffer = writeDate(buffer, pos, length, out);
+            if (needsNextBuffer)
+                break;
+
+            next = ID;
+        }
+        }
+
+        if (needsNextBuffer)
+        {
+            filePos += pos;
+            readToBuffer(buffer, length, csv, filePos);
+            pos = 0;
+        }
+    }
+
+    // writeID(buffer, pos, length, out);
+    // writeReview(buffer, pos, length, out);
+    // writeUpVote(buffer, pos, length, out);
+    // writeVersion(buffer, pos, length, out);
+    // writeDate(buffer, pos, length, out);
 
     csv.close();
     delete[] buffer;
