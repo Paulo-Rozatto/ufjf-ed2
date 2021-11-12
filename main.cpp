@@ -21,9 +21,9 @@ int toInt(char *v, int n)
 {
     int numb = 0;
 
-    for (int i = n - 1; i >= 0; i--)
+    for (int i = 0; i < n; i++)
     {
-        numb += (v[i] - '0') * pow(10, n - 1);
+        numb += (v[i] - '0') * pow(10, n - 1 - i);
     }
 
     return numb;
@@ -209,7 +209,7 @@ void process()
 
     csv.open("archive/tiktok_app_reviews.csv", ios::in | ios::binary);
     // csv.open("archive/test.txt", ios::in | ios::binary);
-    out.open("archive/bin.bin", ios::out | ios::binary);
+    out.open("archive/tiktok_app_reviews.bin", ios::out | ios::binary);
 
     if (!csv.is_open())
     {
