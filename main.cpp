@@ -2,9 +2,10 @@
 #include <fstream>
 #include <math.h>
 
-// #define BUFFER_SIZE 543022558
+// #define BUFFER_SIZE 2048000
 #define BUFFER_SIZE 102400
 #define ROWS 3646473
+// #define ROWS 400
 
 using namespace std;
 
@@ -262,6 +263,7 @@ void process()
     int rowPos = ROW_SIZE * ROWS;
     int next = ID, pos = 0, filePos = 54;
     bool needsNextBuffer;
+    int auxCont = 0;
 
     while (pos < bufferLength)
     {
