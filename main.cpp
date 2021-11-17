@@ -3,12 +3,29 @@
 #include <math.h>
 #include <queue>
 
-// #define BUFFER_SIZE 2048000
 #define BUFFER_SIZE 102400
-#define ROWS 3646476
+#define ROWS 3646476;
 // #define ROWS 400
 
 using namespace std;
+
+/*
+    Os dados da tabela tem todos o mesmo tamanho, tirando o review.
+    Alem disso a quantidade de dados e fixa, o arquivo sempre eh o mesmo com 3.6 milhoes de linhas.
+    Entao, lemos e salvamos primeiro os dados fixos e vamos adcionando os reviews em uma fila.
+    No final, e so escrever os reviews da fila no arquivo.
+    Conseguimos calcular com antecendencia em qual posicao do arquivo o review vai ficar.
+    Entao o binario fica organizado mais ou menos assim.
+
+    id1 posicao_do_review1 upvote1 version1 date1
+    id2 posicao_do_review2 upvote2 version2 date2
+    id3 posicao_do_review3 upvote3 version3 date3
+    [...]
+    tamanho_do_review1 review1
+    tamanho_do_review2 review2
+    tamanho_do_review3 review3
+    [...]
+*/
 
 enum
 {
@@ -17,12 +34,6 @@ enum
     UPVOTE,
     VERSION,
     DATE
-};
-
-struct review
-{
-    int size;
-    string text;
 };
 
 int toInt(char *v, int n)
@@ -53,34 +64,28 @@ bool writeID(char *buffer, int &pos, int length, fstream &file)
 
         file.write((buffer + pos), size * sizeof(char));
         pos += size + 1;
-        cont++;
     }
 
     return needsNextBuffer;
 }
 
-/* 
-    Objetivo: jogar o review para um segundo buffer mantendo a estrura no arquivo binario
-    - func do buffer comun para o buffer review que informe em que posicao no arquivo o review ficara
-    - escrever buffer review no arquivo
-*/
-
-void writeReview(queue<review *> &q, fstream &file)
+void writeReview(queue<string> &q, fstream &file)
 {
-    review *r;
+    string r;
+    int size;
     file.seekp(0, file.end);
     while (!q.empty())
     {
         r = q.front();
-        file.write(reinterpret_cast<const char *>(&r->size), sizeof(int));
-        file.write(r->text.c_str(), r->text.size() * sizeof(char));
+        size = r.size();
+        file.write(reinterpret_cast<const char *>(&size), sizeof(int));
+        file.write(r.c_str(), r.size() * sizeof(char));
 
         q.pop();
-        delete r;
     }
 }
 
-bool reviewToBuffer(char *buffer, int &pos, int length, queue<review *> &q, fstream &file, int &filePos)
+bool reviewToQueue(char *buffer, int &pos, int length, queue<string> &q, fstream &file, int &filePos)
 {
     bool needsNextBuffer = false;
     int i = 0, j, size;
@@ -131,95 +136,13 @@ bool reviewToBuffer(char *buffer, int &pos, int length, queue<review *> &q, fstr
 
     if (!needsNextBuffer)
     {
-        review *r = new review();
-        // escreve enderco de onde esta o review
+        // escreve onde sera enderco de onde esta o review
         file.write(reinterpret_cast<const char *>(&filePos), sizeof(filePos));
 
-        // calcula tamanho do comentario e salva o tamanho no arquivo
-        size = i - pos;
-
-        // r->size = size;
-        r->size = text.size();
-        r->text = text;
-
-        q.push(r);
+        q.push(text);
 
         // calcula a posicao para o proximo review
         filePos += text.size() * sizeof(char) + sizeof(int);
-
-        pos = i + 1;
-    }
-
-    return needsNextBuffer;
-}
-
-bool writeReview(char *buffer, int &pos, int length, fstream &file, int &row)
-{
-    bool needsNextBuffer = false;
-    int i = 0, size;
-
-    if (buffer[pos] == '\"')
-    {
-        i = pos + 1;
-
-        while (true)
-        {
-            if (i == length)
-            {
-                needsNextBuffer = true;
-                break;
-            }
-
-            if (buffer[i] == '\"')
-            {
-                if (buffer[i + 1] == '\"')
-                {
-                    i++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            i++;
-        }
-        i++;
-    }
-    else
-    {
-        for (i = pos; buffer[i] != ','; i++)
-        {
-            if (i == length)
-            {
-                needsNextBuffer = true;
-                break;
-            }
-        }
-    }
-
-    if (!needsNextBuffer)
-    {
-        // escreve enderco de onde esta o review
-        file.write(reinterpret_cast<const char *>(&row), sizeof(row));
-
-        // salva o cursor atual do arquivo
-        int aux = file.tellp();
-
-        // avanca no arquivo ate o local onde vai se colocar o comentario
-        file.seekp(row, file.beg);
-
-        // calcula tamanho do comentario e salva o tamanho no arquivo
-        size = i - pos;
-        file.write(reinterpret_cast<const char *>(&size), sizeof(size));
-
-        // escreve o comentario no arquivo
-        file.write(buffer + pos, size * sizeof(char));
-
-        // calcula a posicao para o proximo review
-        row += size + sizeof(size);
-
-        // volta o cursor do arquivo para o valor salvo
-        file.seekp(aux, file.beg);
 
         pos = i + 1;
     }
@@ -305,7 +228,7 @@ bool writeDate(char *buffer, int &pos, int length, fstream &file)
     return needsNextBuffer;
 }
 
-void readToBuffer(char *buffer, int &length, fstream &file, int &pos, int fileSize)
+void readFileToBuffer(char *buffer, int &length, fstream &file, int &pos, int fileSize)
 {
     length = fileSize - pos;
     file.seekg(pos, file.beg);
@@ -362,7 +285,7 @@ void process()
     int rowPos = ROW_SIZE * ROWS;
     int next = ID, pos = 0, filePos = 54;
     bool needsNextBuffer;
-    queue<review *> reviewQueue;
+    queue<string> reviewQueue;
 
     while (pos < bufferLength)
     {
@@ -379,8 +302,7 @@ void process()
 
         case REVIEW:
         {
-            // needsNextBuffer = writeReview(buffer, pos, bufferLength, out, rowPos);
-            needsNextBuffer = reviewToBuffer(buffer, pos, bufferLength, reviewQueue, out, rowPos);
+            needsNextBuffer = reviewToQueue(buffer, pos, bufferLength, reviewQueue, out, rowPos);
             if (needsNextBuffer)
                 break;
 
@@ -424,7 +346,7 @@ void process()
         {
             filePos += pos;
             // cout << filePos / 543022558.0 << endl; // porcentagem do arquivo processado
-            readToBuffer(buffer, bufferLength, csv, filePos, FILE_SIZE);
+            readFileToBuffer(buffer, bufferLength, csv, filePos, FILE_SIZE);
             pos = 0;
         }
     }
@@ -447,7 +369,7 @@ void test()
     int position;
     int upvote, version[3], size;
     int i = 3646475, aux;
-    // i = 0;
+    // i = 399;
     i *= ROW_SIZE;
 
     bin.seekg(i, bin.beg);
@@ -459,7 +381,6 @@ void test()
     bin.read(reinterpret_cast<char *>(version), sizeof(version));
     bin.read(date, 19 * sizeof(char));
 
-    // position = 53096;
     bin.seekg(position, bin.beg);
     bin.read(reinterpret_cast<char *>(&size), sizeof(size));
 
