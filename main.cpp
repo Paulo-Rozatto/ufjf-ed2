@@ -2,6 +2,7 @@
 #include <fstream>
 #include <math.h>
 #include <queue>
+#include <chrono>
 
 #define BUFFER_SIZE 102400
 #define ROWS 3646476;
@@ -394,6 +395,7 @@ void test()
 int main(int argc, char const *argv[])
 {
     char option;
+    std::chrono::time_point<std::chrono::system_clock> start, end;
 
     do
     {
@@ -410,7 +412,9 @@ int main(int argc, char const *argv[])
         case '0':
             break;
         case '1':
+            start = std::chrono::system_clock::now();
             process();
+            end = std::chrono::system_clock::now();
             // test();
             break;
         default:
@@ -420,6 +424,9 @@ int main(int argc, char const *argv[])
         option = '0';
 
     } while (option != '0');
+
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    cout << "tempo: " << elapsed_seconds.count() << "s" << endl;
 
     return 0;
 }
