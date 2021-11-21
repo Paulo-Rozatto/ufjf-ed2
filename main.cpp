@@ -467,6 +467,7 @@ void acessaRegistro(int i)
 void testeImportacao()
 {
     fstream bin;
+    Register *registers;
     char c;
     int n;
     bin.open("tiktok_app_reviews.bin", ios::in | ios::binary);
@@ -486,18 +487,23 @@ void testeImportacao()
 
     srand(time(NULL));
 
-    Register r;
+    n = c == '1' ? 10 : 100;
+    registers = new Register[n];
+
+    cout << "Escolhendo " << n << " registros aleatoriamente..." << endl;
     int j;
+    for (int i = 0; i < n; i++)
+    {
+        j = rand() % ROWS;
+        registers[i].init(bin, j);
+    }
 
     if (c == '1')
     {
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < n; i++)
         {
-            j = rand() % ROWS;
-
             cout << (i + 1) << " - Registro " << j << ":" << endl;
-            r.init(bin, j);
-            r.print();
+            registers[i].print();
             cout << endl;
         }
     }
@@ -506,16 +512,79 @@ void testeImportacao()
         fstream out;
         out.open("teste_importacao.txt", ios::out);
 
-        for (int i = 0; i < 100; i++)
+        cout << "Escrevendo " << n << " registros em teste_importacao.txt" << endl;
+        for (int i = 0; i < n; i++)
         {
-            j = rand() % ROWS;
-
             out << (i + 1) << " - Registro " << j << ":" << endl;
-            r.init(bin, j);
-            r.print(out);
+            registers[i].print(out);
             out << endl;
         }
     }
+
+    delete[] registers;
+}
+
+void importacao()
+{
+    fstream bin;
+    Register *registers;
+    char c;
+    int n;
+    bin.open("tiktok_app_reviews.bin", ios::in | ios::binary);
+
+    cout << "Digite o valor de N: ";
+    cin >> n;
+
+    registers = new Register[n];
+
+    do
+    {
+        cout << "Onde exibir? " << endl
+             << "1 - Exibir no console" << endl
+             << "2 - Gerar arquivo de texto" << endl
+             << "opcao: ";
+        cin >> c;
+
+        if (c != '1' && c != '2')
+            cout << "Opcao invalida!" << endl;
+
+    } while (c != '1' && c != '2');
+
+    srand(time(NULL));
+
+    cout << "Escolhendo " << n << " registros aleatoriamente..." << endl;
+    int j;
+    for (int i = 0; i < n; i++)
+    {
+        j = rand() % ROWS;
+        registers[i].init(bin, j);
+    }
+
+    if (c == '1')
+    {
+        for (int i = 0; i < n; i++)
+        {
+            cout << (i + 1) << " - Registro " << j << ":" << endl;
+            registers[i].print();
+            cout << endl;
+        }
+    }
+    else
+    {
+        fstream out;
+        string name = "importacao_" + to_string(n) + "_registros.txt";
+        out.open(name, ios::out);
+
+        cout << "Escrevendo " << n << " registros em " << name << "..." << endl;
+        for (int i = 0; i < n; i++)
+        {
+            out << (i + 1) << " - Registro " << j << ":" << endl;
+            registers[i].print(out);
+            out << endl;
+        }
+    }
+
+    delete[] registers;
 }
 
 int main(int argc, char const *argv[])
@@ -561,6 +630,7 @@ int main(int argc, char const *argv[])
         cout << "Menu: " << endl
              << "1 - Acessar Registro: " << endl
              << "2 - Teste de Importacao:" << endl
+             << "3 - Importar N registros" << endl
              << "0 - Sair" << endl
              << "Digite a opcao: ";
 
@@ -578,6 +648,9 @@ int main(int argc, char const *argv[])
             break;
         case '2':
             testeImportacao();
+            break;
+        case '3':
+            importacao();
             break;
         default:
             cout << "Opcao invalida" << endl;
