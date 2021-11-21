@@ -1,5 +1,7 @@
 .vscode
 out/
+teste_importacao.txt
+tiktok_app_reviews.bin
 
 # ignorar arquivos dentro da pasta archive
 archive/*

@@ -343,25 +343,17 @@ void readFileToBuffer(char *buffer, int &length, fstream &file, int &pos, int fi
     file.read(buffer, length);
 }
 
-void process()
+void process(fstream &csv)
 {
-    fstream csv, out;
+    fstream out;
 
     // csv.open("archive/test.txt", ios::in);
-    csv.open("archive/tiktok_app_reviews.csv", ios::in);
-    out.open("archive/tiktok_app_reviews.bin", ios::out | ios::binary);
-
-    if (!csv.is_open())
-    {
-        cout << "Erro: Arquivo archive/tiktok_app_reviews.csv nao encontrado" << endl;
-        csv.close();
-        out.close();
-        return;
-    }
+    // csv.open("archive/tiktok_app_reviews.csv", ios::in);
+    out.open("tiktok_app_reviews.bin", ios::out | ios::binary);
 
     if (!out.is_open())
     {
-        cout << "Erro: Nao foi possivel ler/criar arquivo archive/tiktok_app_reviews.bin" << endl;
+        cout << "Erro: Nao foi possivel criar arquivo tiktok_app_reviews.bin" << endl;
         csv.close();
         out.close();
         return;
@@ -461,43 +453,10 @@ void process()
     delete[] buffer;
 }
 
-void test()
-{
-    fstream bin;
-    // id (89 char) + review position (1 int) + upvote (1 int) + version (3 int) + date (19 char)
-    const int ROW_SIZE = 89 * sizeof(char) + sizeof(int) + sizeof(int) + 3 * sizeof(int) + 19 * sizeof(char);
-
-    bin.open("archive/tiktok_app_reviews.bin", ios::in | ios::binary);
-    char id[89], date[19];
-    int position;
-    int upvote, version[3], size;
-    int i = 3646475, aux;
-    // i = 399;
-    i *= ROW_SIZE;
-
-    bin.seekg(i, bin.beg);
-    aux = bin.tellg();
-
-    bin.read(id, 89 * sizeof(char));
-    bin.read(reinterpret_cast<char *>(&position), sizeof(position));
-    bin.read(reinterpret_cast<char *>(&upvote), sizeof(upvote));
-    bin.read(reinterpret_cast<char *>(version), sizeof(version));
-    bin.read(date, 19 * sizeof(char));
-
-    bin.seekg(position, bin.beg);
-    bin.read(reinterpret_cast<char *>(&size), sizeof(size));
-
-    char *review = new char[size];
-
-    bin.read(review, size * sizeof(char));
-    bin.close();
-    delete[] review;
-}
-
 void acessaRegistro(int i)
 {
     fstream bin;
-    bin.open("archive/tiktok_app_reviews.bin", ios::in | ios::binary);
+    bin.open("tiktok_app_reviews.bin", ios::in | ios::binary);
 
     Register r(bin, i);
 
@@ -510,7 +469,7 @@ void testeImportacao()
     fstream bin;
     char c;
     int n;
-    bin.open("archive/tiktok_app_reviews.bin", ios::in | ios::binary);
+    bin.open("tiktok_app_reviews.bin", ios::in | ios::binary);
 
     do
     {
@@ -562,14 +521,46 @@ void testeImportacao()
 int main(int argc, char const *argv[])
 {
     char option;
-    std::chrono::time_point<std::chrono::system_clock> start, end;
+
+    ifstream bin("tiktok_app_reviews.bin");
+    if (!bin.good())
+    {
+        cout << "Arquivo binario nao encontrado." << endl;
+
+        if (argc < 2)
+        {
+            cout << "Localizacao de tiktok_app_reviews.csv nao informado." << endl;
+            return 1;
+        }
+        cout << "Tentando abrir " << argv[1] << endl;
+
+        fstream csv;
+        csv.open(argv[1], ios::in);
+
+        if (csv.is_open())
+        {
+            std::chrono::time_point<std::chrono::system_clock> start, end;
+
+            cout << "Processando " << argv[1] << " para tiktok_app_reviews.bin..." << endl;
+            start = std::chrono::system_clock::now();
+            process(csv);
+            end = std::chrono::system_clock::now();
+
+            std::chrono::duration<double> elapsed_seconds = end - start;
+            cout << "Arquivo processado em " << elapsed_seconds.count() << "s" << endl;
+        }
+        else
+        {
+            cout << "Nao foi possivel abrir " << argv[1] << endl;
+            return 1;
+        }
+    }
 
     do
     {
         cout << "Menu: " << endl
              << "1 - Acessar Registro: " << endl
              << "2 - Teste de Importacao:" << endl
-             << "3 - Binarizar arquivo .csv" << endl
              << "0 - Sair" << endl
              << "Digite a opcao: ";
 
@@ -588,21 +579,12 @@ int main(int argc, char const *argv[])
         case '2':
             testeImportacao();
             break;
-        case '3':
-            start = std::chrono::system_clock::now();
-            // process();
-            end = std::chrono::system_clock::now();
-            // test();
-            break;
         default:
             cout << "Opcao invalida" << endl;
             break;
         }
 
     } while (option != '0');
-
-    // std::chrono::duration<double> elapsed_seconds = end - start;
-    // cout << "tempo: " << elapsed_seconds.count() << "s" << endl;
 
     return 0;
 }
