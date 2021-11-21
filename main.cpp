@@ -1,12 +1,13 @@
 #include <iostream>
+#include <stdlib.h>
 #include <fstream>
 #include <math.h>
 #include <queue>
 #include <chrono>
+#include <time.h>
 
 #define BUFFER_SIZE 102400
 #define ROWS 3646476;
-// #define ROWS 400
 
 using namespace std;
 
@@ -53,6 +54,7 @@ public:
 
     void init(fstream &file, int index);
     void print();
+    void print(fstream &file);
 };
 
 void Register::init(fstream &file, int i)
@@ -74,6 +76,9 @@ void Register::init(fstream &file, int i)
     file.seekg(reviewPosition, file.beg);
     file.read(reinterpret_cast<char *>(&size), sizeof(size));
 
+    if (review != nullptr)
+        delete[] review;
+
     review = new char[size + 1];
 
     file.read(review, size * sizeof(char));
@@ -84,11 +89,37 @@ void Register::init(fstream &file, int i)
 void Register::print()
 {
     if (review != nullptr)
+    {
         cout << "id: " << id << endl
-             << "upvote: " << upvote << endl
-             << "version: " << version[0] << "." << version[1] << "." << version[2] << endl
-             << "date: " << date << endl
+             << "upvote: " << upvote << endl;
+
+        if (version[0] == 0 && version[1] == 0 && version[2] == 0)
+            cout << "version: "
+                 << "not informed" << endl;
+        else
+            cout << "version: " << version[0] << "." << version[1] << "." << version[2] << endl;
+
+        cout << "date: " << date << endl
              << "review: " << review << endl;
+    }
+}
+
+void Register::print(fstream &file)
+{
+    if (review != nullptr)
+    {
+        file << "id: " << id << endl
+             << "upvote: " << upvote << endl;
+
+        if (version[0] == 0 && version[1] == 0 && version[2] == 0)
+            file << "version: "
+                 << "not informed" << endl;
+        else
+            file << "version: " << version[0] << "." << version[1] << "." << version[2] << endl;
+
+        file << "date: " << date << endl
+             << "review: " << review << endl;
+    }
 }
 
 Register::Register()
@@ -98,6 +129,7 @@ Register::Register()
 
 Register::Register(fstream &file, int index)
 {
+    review = nullptr;
     init(file, index);
 }
 
@@ -470,6 +502,61 @@ void acessaRegistro(int i)
     Register r(bin, i);
 
     r.print();
+    bin.close();
+}
+
+void testeImportacao()
+{
+    fstream bin;
+    char c;
+    int n;
+    bin.open("archive/tiktok_app_reviews.bin", ios::in | ios::binary);
+
+    do
+    {
+        cout << "Qual opcao: " << endl
+             << "1 - Exibir no console" << endl
+             << "2 - Gerar arquivo de texto" << endl
+             << "opcao: ";
+        cin >> c;
+
+        if (c != '1' && c != '2')
+            cout << "Opcao invalida!" << endl;
+
+    } while (c != '1' && c != '2');
+
+    srand(time(NULL));
+
+    Register r;
+    int j;
+
+    if (c == '1')
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            j = rand() % ROWS;
+
+            cout << (i + 1) << " - Registro " << j << ":" << endl;
+            r.init(bin, j);
+            r.print();
+            cout << endl;
+        }
+    }
+    else
+    {
+        fstream out;
+        out.open("teste_importacao.txt", ios::out);
+
+        for (int i = 0; i < 100; i++)
+        {
+            j = rand() % ROWS;
+
+            out << (i + 1) << " - Registro " << j << ":" << endl;
+            r.init(bin, j);
+            r.print(out);
+            out << endl;
+        }
+    }
 }
 
 int main(int argc, char const *argv[])
@@ -497,6 +584,9 @@ int main(int argc, char const *argv[])
             cout << "Informe o indice do registro: ";
             cin >> i;
             acessaRegistro(i);
+            break;
+        case '2':
+            testeImportacao();
             break;
         case '3':
             start = std::chrono::system_clock::now();
