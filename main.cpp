@@ -37,6 +37,76 @@ enum
     DATE
 };
 
+class Register
+{
+private:
+    char id[90];
+    int upvote;
+    int version[3];
+    char date[20];
+    char *review;
+
+public:
+    Register();
+    Register(fstream &file, int index);
+    ~Register();
+
+    void init(fstream &file, int index);
+    void print();
+};
+
+void Register::init(fstream &file, int i)
+{
+    // id (89 char) + review position (1 int) + upvote (1 int) + version (3 int) + date (19 char)
+    const int ROW_SIZE = 89 * sizeof(char) + sizeof(int) + sizeof(int) + 3 * sizeof(int) + 19 * sizeof(char);
+    int aux, reviewPosition, size;
+
+    i *= ROW_SIZE;
+
+    file.seekg(i, file.beg);
+
+    file.read(id, 89 * sizeof(char));
+    file.read(reinterpret_cast<char *>(&reviewPosition), sizeof(reviewPosition));
+    file.read(reinterpret_cast<char *>(&upvote), sizeof(upvote));
+    file.read(reinterpret_cast<char *>(version), sizeof(version));
+    file.read(date, 19 * sizeof(char));
+
+    file.seekg(reviewPosition, file.beg);
+    file.read(reinterpret_cast<char *>(&size), sizeof(size));
+
+    review = new char[size + 1];
+
+    file.read(review, size * sizeof(char));
+
+    id[89] = date[19] = review[size] = '\0';
+}
+
+void Register::print()
+{
+    if (review != nullptr)
+        cout << "id: " << id << endl
+             << "upvote: " << upvote << endl
+             << "version: " << version[0] << "." << version[1] << "." << version[2] << endl
+             << "date: " << date << endl
+             << "review: " << review << endl;
+}
+
+Register::Register()
+{
+    review = nullptr;
+}
+
+Register::Register(fstream &file, int index)
+{
+    init(file, index);
+}
+
+Register::~Register()
+{
+    if (review != nullptr)
+        delete[] review;
+}
+
 int toInt(char *v, int n)
 {
     int numb = 0;
@@ -392,6 +462,16 @@ void test()
     delete[] review;
 }
 
+void acessaRegistro(int i)
+{
+    fstream bin;
+    bin.open("archive/tiktok_app_reviews.bin", ios::in | ios::binary);
+
+    Register r(bin, i);
+
+    r.print();
+}
+
 int main(int argc, char const *argv[])
 {
     char option;
@@ -400,20 +480,27 @@ int main(int argc, char const *argv[])
     do
     {
         cout << "Menu: " << endl
-             << "1 - Binarizar arquivo .csv" << endl
+             << "1 - Acessar Registro: " << endl
+             << "2 - Teste de Importacao:" << endl
+             << "3 - Binarizar arquivo .csv" << endl
              << "0 - Sair" << endl
              << "Digite a opcao: ";
 
-        // cin >> option;
-        option = '1';
+        cin >> option;
 
         switch (option)
         {
         case '0':
             break;
         case '1':
+            int i;
+            cout << "Informe o indice do registro: ";
+            cin >> i;
+            acessaRegistro(i);
+            break;
+        case '3':
             start = std::chrono::system_clock::now();
-            process();
+            // process();
             end = std::chrono::system_clock::now();
             // test();
             break;
@@ -421,12 +508,11 @@ int main(int argc, char const *argv[])
             cout << "Opcao invalida" << endl;
             break;
         }
-        option = '0';
 
     } while (option != '0');
 
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    cout << "tempo: " << elapsed_seconds.count() << "s" << endl;
+    // std::chrono::duration<double> elapsed_seconds = end - start;
+    // cout << "tempo: " << elapsed_seconds.count() << "s" << endl;
 
     return 0;
 }
