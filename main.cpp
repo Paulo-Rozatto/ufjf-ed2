@@ -178,7 +178,7 @@ void testeImportacao()
     fstream bin;
     Register *registers;
     char c;
-    int n;
+    int n, *indices;
     bin.open("tiktok_app_reviews.bin", ios::in | ios::binary);
 
     do
@@ -198,6 +198,7 @@ void testeImportacao()
 
     n = c == '1' ? 10 : 100;
     registers = new Register[n];
+    indices = new int[n];
 
     cout << "Escolhendo " << n << " registros aleatoriamente..." << endl;
     int j;
@@ -205,13 +206,14 @@ void testeImportacao()
     {
         j = rand() % ROWS;
         registers[i].init(bin, j);
+        indices[i] = j;
     }
 
     if (c == '1')
     {
         for (int i = 0; i < n; i++)
         {
-            cout << (i + 1) << " - Registro " << j << ":" << endl;
+            cout << (i + 1) << " - Registro " << indices[i] << ":" << endl;
             registers[i].print();
             cout << endl;
         }
@@ -224,13 +226,13 @@ void testeImportacao()
         cout << "Escrevendo " << n << " registros em teste_importacao.txt" << endl;
         for (int i = 0; i < n; i++)
         {
-            out << (i + 1) << " - Registro " << j << ":" << endl;
+            out << (i + 1) << " - Registro " << indices[i] << ":" << endl;
             registers[i].print(out);
             out << endl;
         }
     }
 
-    delete[] registers;
+    delete[] registers; delete[] indices;
 }
 
 void importacao()
@@ -238,13 +240,14 @@ void importacao()
     fstream bin;
     Register *registers;
     char c;
-    int n;
+    int n, *indices;
     bin.open("tiktok_app_reviews.bin", ios::in | ios::binary);
 
     cout << "Digite o valor de N: ";
     cin >> n;
 
     registers = new Register[n];
+    indices = new int[n];
 
     do
     {
@@ -267,13 +270,14 @@ void importacao()
     {
         j = rand() % ROWS;
         registers[i].init(bin, j);
+        indices[i] = j;
     }
 
     if (c == '1')
     {
         for (int i = 0; i < n; i++)
         {
-            cout << (i + 1) << " - Registro " << j << ":" << endl;
+            cout << (i + 1) << " - Registro " << indices[i] << ":" << endl;
             registers[i].print();
             cout << endl;
         }
@@ -287,13 +291,13 @@ void importacao()
         cout << "Escrevendo " << n << " registros em " << name << "..." << endl;
         for (int i = 0; i < n; i++)
         {
-            out << (i + 1) << " - Registro " << j << ":" << endl;
+            out << (i + 1) << " - Registro " << indices[i] << ":" << endl;
             registers[i].print(out);
             out << endl;
         }
     }
 
-    delete[] registers;
+    delete[] registers; delete[] indices;
 }
 
 int main(int argc, char const *argv[])
