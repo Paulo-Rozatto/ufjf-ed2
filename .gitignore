@@ -1,5 +1,7 @@
-.vscode
 out/
+archive/
 
-# ignorar arquivos dentro da pasta archive
-archive/*
+.vscode
+*.txt
+*.bin
+programa
