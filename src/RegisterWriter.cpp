@@ -13,6 +13,12 @@ int RegisterWriter::toInt(char *v, int n)
     return numb;
 }
 
+/*
+    Todas as operacoes de escrita verificam de alguma forma se a informacao sendo lida esta completa no buffer.
+    Se nao estiver, elas param a execucao e solicitam uma nova leitura do arquivo para o buffer.
+    No buffer atualizado, o conteudo antes cortado estara no comeco e completo.
+*/
+
 bool RegisterWriter::writeID(char *buffer, int &pos, int length, fstream &file)
 {
     bool needsNextBuffer = false;
@@ -50,6 +56,12 @@ void RegisterWriter::writeReview(queue<string> &q, fstream &file)
     }
 }
 
+/*
+    Os textos de review podem comecar com algum caractere qualquer ou com aspas duplas.
+    Se comeca com um char qualquer, a leitura e simples, ela acaba quando se encontra uma virgula.
+    Se comeca com aspas, ela termina com aspas, mas nem todas aspas significam o final. 
+    Duas aspas seguidas significam que ha aspas no texto, nao eh as aspas do final.
+*/
 bool RegisterWriter::reviewToQueue(char *buffer, int &pos, int length, queue<string> &q, fstream &file, int &reviewPos)
 {
     bool needsNextBuffer = false;
@@ -138,6 +150,10 @@ bool RegisterWriter::writeUpVote(char *buffer, int &pos, int length, fstream &fi
     return needsNextBuffer;
 }
 
+/*
+    A versao e mantida em 3 inteiros terem o mesmo tamanho no arquivo binario.
+    Caso nao seja informada a versao, o e atribuido 0.0.0
+*/
 bool RegisterWriter::writeVersion(char *buffer, int &pos, int length, fstream &file)
 {
     bool needsNextBuffer = false;
@@ -172,6 +188,9 @@ bool RegisterWriter::writeVersion(char *buffer, int &pos, int length, fstream &f
     return needsNextBuffer;
 }
 
+/*
+    Como nao e feita nenuma operacao com a data, ela e mantida em array de char
+*/
 bool RegisterWriter::writeDate(char *buffer, int &pos, int length, fstream &file)
 {
     bool needsNextBuffer = false;

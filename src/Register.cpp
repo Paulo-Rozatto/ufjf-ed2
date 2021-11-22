@@ -25,7 +25,7 @@ void Register::init(fstream &file, int i)
 {
     // id (89 char) + review position (1 int) + upvote (1 int) + version (3 int) + date (19 char)
     const int ROW_SIZE = 89 * sizeof(char) + sizeof(int) + sizeof(int) + 3 * sizeof(int) + 19 * sizeof(char);
-    int aux, reviewPosition, size;
+    int reviewPosition, size;
 
     i *= ROW_SIZE;
 
@@ -56,7 +56,8 @@ void Register::print()
     {
         cout << "id: " << id << endl
              << "upvote: " << upvote << endl;
-
+        
+        // algumas linhas nao possuem versao, entao eh atribuido o valor 0.0.0 para manter o padrao no arquivo binario
         if (version[0] == 0 && version[1] == 0 && version[2] == 0)
             cout << "version: "
                  << "not informed" << endl;
