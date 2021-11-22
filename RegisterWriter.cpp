@@ -50,7 +50,7 @@ void RegisterWriter::writeReview(queue<string> &q, fstream &file)
     }
 }
 
-bool RegisterWriter::reviewToQueue(char *buffer, int &pos, int length, queue<string> &q, fstream &file, int &filePos)
+bool RegisterWriter::reviewToQueue(char *buffer, int &pos, int length, queue<string> &q, fstream &file, int &reviewPos)
 {
     bool needsNextBuffer = false;
     int i = 0, j, size;
@@ -102,12 +102,12 @@ bool RegisterWriter::reviewToQueue(char *buffer, int &pos, int length, queue<str
     if (!needsNextBuffer)
     {
         // escreve onde sera enderco de onde esta o review
-        file.write(reinterpret_cast<const char *>(&filePos), sizeof(filePos));
+        file.write(reinterpret_cast<const char *>(&reviewPos), sizeof(reviewPos));
 
         q.push(text);
 
         // calcula a posicao para o proximo review
-        filePos += text.size() * sizeof(char) + sizeof(int);
+        reviewPos += text.size() * sizeof(char) + sizeof(int);
 
         pos = i + 1;
     }

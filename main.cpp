@@ -1,7 +1,6 @@
 #include <iostream>
 #include <stdlib.h>
 #include <fstream>
-#include <math.h>
 #include <queue>
 #include <chrono>
 #include <time.h>
@@ -31,15 +30,6 @@ using namespace std;
     [...]
 */
 
-enum
-{
-    ID,
-    REVIEW,
-    UPVOTE,
-    VERSION,
-    DATE
-};
-
 void readFileToBuffer(char *buffer, int &length, fstream &file, int &pos, int fileSize)
 {
     length = fileSize - pos;
@@ -52,12 +42,10 @@ void readFileToBuffer(char *buffer, int &length, fstream &file, int &pos, int fi
     file.read(buffer, length);
 }
 
-void process(fstream &csv)
+void csvToBin(fstream &csv)
 {
     fstream out;
 
-    // csv.open("archive/test.txt", ios::in);
-    // csv.open("archive/tiktok_app_reviews.csv", ios::in);
     out.open("tiktok_app_reviews.bin", ios::out | ios::binary);
 
     if (!out.is_open())
@@ -71,6 +59,7 @@ void process(fstream &csv)
     csv.seekg(0, csv.end);
     const int FILE_SIZE = csv.tellg();
 
+    // Calculando tamanho da linha
     // id (89 char) + review position (1 int) + upvote (1 int) + version (3 int) + date (19 char)
     const int ROW_SIZE = 89 * sizeof(char) + sizeof(int) + sizeof(int) + 3 * sizeof(int) + 19 * sizeof(char);
 
@@ -86,7 +75,16 @@ void process(fstream &csv)
     csv.seekg(54, csv.beg); // pula primeira linha do arquivo com o nome das colunas
     csv.read(buffer, bufferLength);
 
-    int rowPos = ROW_SIZE * ROWS;
+    enum
+    {
+        ID,
+        REVIEW,
+        UPVOTE,
+        VERSION,
+        DATE
+    };
+
+    int nextReviewPos = ROW_SIZE * ROWS;
     int next = ID, pos = 0, filePos = 54;
     bool needsNextBuffer;
     queue<string> reviewQueue;
@@ -97,6 +95,7 @@ void process(fstream &csv)
         {
         case ID:
         {
+            // as funcoes de escrita foram colocadas em um arquivo separado para evitar poluir muito o arquivo main.cpp
             needsNextBuffer = RegisterWriter::writeID(buffer, pos, bufferLength, out);
             if (needsNextBuffer)
                 break;
@@ -106,7 +105,7 @@ void process(fstream &csv)
 
         case REVIEW:
         {
-            needsNextBuffer = RegisterWriter::reviewToQueue(buffer, pos, bufferLength, reviewQueue, out, rowPos);
+            needsNextBuffer = RegisterWriter::reviewToQueue(buffer, pos, bufferLength, reviewQueue, out, nextReviewPos);
             if (needsNextBuffer)
                 break;
 
@@ -149,7 +148,6 @@ void process(fstream &csv)
         if (needsNextBuffer)
         {
             filePos += pos;
-            // cout << filePos / 543022558.0 << endl; // porcentagem do arquivo processado
             readFileToBuffer(buffer, bufferLength, csv, filePos, FILE_SIZE);
             pos = 0;
         }
@@ -232,7 +230,8 @@ void testeImportacao()
         }
     }
 
-    delete[] registers; delete[] indices;
+    delete[] registers;
+    delete[] indices;
 }
 
 void importacao()
@@ -297,7 +296,8 @@ void importacao()
         }
     }
 
-    delete[] registers; delete[] indices;
+    delete[] registers;
+    delete[] indices;
 }
 
 int main(int argc, char const *argv[])
@@ -325,7 +325,7 @@ int main(int argc, char const *argv[])
 
             cout << "Processando " << argv[1] << " para tiktok_app_reviews.bin..." << endl;
             start = std::chrono::system_clock::now();
-            process(csv);
+            csvToBin(csv);
             end = std::chrono::system_clock::now();
 
             std::chrono::duration<double> elapsed_seconds = end - start;
