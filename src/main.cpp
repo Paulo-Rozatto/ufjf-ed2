@@ -4,8 +4,11 @@
 #include <queue>
 #include <chrono>
 #include <time.h>
+#include <cstdlib>
 #include "Register.hpp"
 #include "RegisterWriter.hpp"
+
+#include "Avaliacao.hpp"
 
 #define BUFFER_SIZE 102400
 #define ROWS 3646476;
@@ -171,6 +174,19 @@ void acessaRegistro(int i)
     bin.close();
 }
 
+void acessaAvaliacaoAndre()
+{
+    int indice;
+    cout << "Informe o avaliacao a ser acessada: " << endl;
+    cin >> indice;
+    fstream arqBin;
+    arqBin.open("tiktok_app_reviews.bin", ios::in | ios:: binary);
+
+    Avaliacao avaliacao(arqBin, indice);
+    avaliacao.imprimeTerminal();
+    arqBin.close();
+}
+
 void testeImportacao()
 {
     fstream bin;
@@ -300,6 +316,60 @@ void importacao()
     delete[] indices;
 }
 
+void importacaoAndre()
+{
+    fstream bin;
+    Avaliacao *avaliacoes;
+    int opcao = 0;
+    int n, *indices;
+    bin.open("tiktok_app_reviews.bin", ios::in | ios::binary);
+
+    cout << "Digite quantas avaliacoes quer importar: ";
+    cin >> n;
+
+    avaliacoes = new Avaliacao[n];
+    indices = new int[n];
+    while (opcao != 1 && opcao != 2)
+    {
+        cout << "Escolha onde imprimir" << endl << "1 - Exibir no console" << endl << "2 - Gerar arquivo de texto" << endl;
+        cin >> opcao;
+        if (opcao != 1 && opcao != 2)
+            cout << "Opcao invalida!" << endl;
+    }
+    srand(time(NULL));
+    //gerando numeros aleatorios para acessar os indices
+    int aux;
+    for (int i = 0; i < n; i++)
+    {
+        aux = rand();
+        avaliacoes[i].criar(bin, aux);
+        indices[i] = aux;
+    }
+    if (opcao == 1)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            cout << (i + 1) << " - Analise " << indices[i] << ":" << endl;
+            avaliacoes[i].imprimeTerminal();
+            cout << endl;
+        }
+    }
+    else
+    {
+        fstream impressao;
+        string nome = "impressao_de_" + to_string(n) + "_avaliacoes.txt";
+        impressao.open(nome, ios::out);
+        for (int i = 0; i < n; i++)
+        {
+            impressao << (i + 1) << " - Analise " << indices[i] << ":" << endl;
+            avaliacoes[i].imprimeArquivo(impressao);
+            impressao << endl;
+        }
+    }
+    delete[] avaliacoes;
+    delete[] indices;
+}
+
 int main(int argc, char const *argv[])
 {
     char option;
@@ -344,6 +414,8 @@ int main(int argc, char const *argv[])
              << "1 - Acessar Registro: " << endl
              << "2 - Teste de Importacao:" << endl
              << "3 - Importar N registros" << endl
+             << "4 - Acessar Registro:(Andre)" << endl
+             << "5 - Importar N registros:(Andre)" << endl
              << "0 - Sair" << endl
              << "Digite a opcao: ";
 
@@ -364,6 +436,12 @@ int main(int argc, char const *argv[])
             break;
         case '3':
             importacao();
+            break;
+        case '4':
+            acessaAvaliacaoAndre();
+            break;
+        case '5':
+            importacaoAndre();
             break;
         default:
             cout << "Opcao invalida" << endl;
