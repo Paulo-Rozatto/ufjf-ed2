@@ -10,6 +10,23 @@
 #include "Avaliacao.hpp"
 #include "Sort.hpp"
 
+void importacao(Register **registers, int n)
+{
+    fstream bin;
+    int *indices;
+    bin.open("tiktok_app_reviews.bin", ios::in | ios::binary);
+
+    srand(time(NULL));
+
+    cout << "Escolhendo " << n << " registros aleatoriamente..." << endl;
+    int j;
+    for (int i = 0; i < n; i++)
+    {
+        j = rand() % ROWS;
+        registers[i] = new Register(bin, j);
+    }
+}
+
 int main(int argc, char const *argv[])
 {
     char option;
@@ -47,6 +64,17 @@ int main(int argc, char const *argv[])
             return 1;
         }
     }
+
+    Register **r;
+    int n = 10;
+
+    r = new Register *[n];
+
+    importacao(r, n);
+
+    for (int i = 0; i < n; i++)
+        cout << r[i]->getUpvote() << " ";
+    cout << endl;
 
     do
     {

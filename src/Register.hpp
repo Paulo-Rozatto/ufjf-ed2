@@ -20,5 +20,7 @@ public:
     void init(fstream &file, int index);
     void print();
     void print(fstream &file);
+
+    int getUpvote() { return upvote; };
 };
 #endif
