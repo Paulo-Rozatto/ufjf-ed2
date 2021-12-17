@@ -1,6 +1,18 @@
 #ifndef SORT_HPP
 #define SORT_HPP
 
+/*
+    O algoritmo de ordenação escolhido foi o Intro Sort (introspective sort)
+    A função std::sort implementa uma versão do intro sort
+    O Intro Sort é um algoritmo hibrido que utiliza o QucickSort, HeapSort e InsertionSort
+    Caso o tamanho do vetor seja pequeno, o InsertionSort é utilizado.
+    Do contrário, o quick sort é utilizado e, caso o número de chamadas seja execedida, o algortimo troca
+    para HeapSort para evitar o pior caso do QuickSort
+
+    https://www.geeksforgeeks.org/know-your-sorting-algorithm-set-2-introsort-cs-sorting-weapon/
+    https://www.geeksforgeeks.org/internal-details-of-stdsort-in-c/
+*/
+
 void swap(int &a, int &b)
 {
     int aux = a;
@@ -10,21 +22,20 @@ void swap(int &a, int &b)
 
 // Insertion Sort
 
-void insertionSort(int *v, int n)
+void insertionSort(int *v, int begin, int end)
 {
-    for(int i = 0; i < n - 1; i++)
+    for (int i = begin; i < end - 1; i++)
     {
         int j = i + 1;
         int pivot = v[j];
 
-        while (j > 0 && pivot > v[j - 1])
+        while (j > 0 && pivot < v[j - 1])
         {
             v[j] = v[j - 1];
             j--;
         }
 
         v[j] = pivot;
-        
     }
 }
 
@@ -108,6 +119,53 @@ void heapSort(int *v, int n)
         swap(v[0], v[n]);
         heapify(v, 0, n);
     }
+}
+
+void heapSort(int *v, int begin, int end)
+{
+    int size = end - begin;
+
+    for (int i = size / 2 - 1 + begin; i >= begin; i--)
+        heapify(v, i, end);
+
+    while (end > begin)
+    {
+        end--;
+        swap(v[begin], v[end]);
+        heapify(v, begin, end);
+    }
+}
+
+// Intro sort
+
+void introSortRec(int *v, int begin, int end, int depthLimit)
+{
+    int size = end - begin;
+
+    if (size < 16)
+    {
+        insertionSort(v, begin, end);
+        return;
+    }
+
+    if (depthLimit == 0)
+    {
+        heapSort(v, begin, end);
+        return;
+    }
+
+    int pivot = partition(v, begin, end);
+    depthLimit -= 1;
+
+    introSortRec(v, begin, pivot, depthLimit);
+    introSortRec(v, pivot + 1, end, depthLimit);
+}
+
+void introSort(int *v, int begin, int end)
+{
+    int depthLimit = 2 * log(end - begin);
+
+    introSortRec(v, begin, end, depthLimit);
 }
 
 #endif
