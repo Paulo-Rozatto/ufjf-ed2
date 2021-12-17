@@ -17,9 +17,33 @@ void importacao(Register **registers, int n)
     int j;
     for (int i = 0; i < n; i++)
     {
-        j = rand() % ROWS;
+        // j = rand() % ROWS;
+        j = i;
         registers[i] = new Register(bin, j);
     }
+}
+
+void temporario()
+{
+    Register **r;
+    int n = 10;
+    int contMov = 0, contComp = 0;
+    r = new Register *[n];
+
+    importacao(r, n);
+
+    for (int i = 0; i < n; i++)
+        cout << r[i]->getUpvote() << " ";
+    cout << endl;
+
+    introSort(r, 0, n, &contMov, &contComp);
+
+    for (int i = 0; i < n; i++)
+        cout << r[i]->getUpvote() << " ";
+    cout << endl;
+
+    cout << "Mov: " << contMov << " - "
+         << "Comp: " << contComp << endl;
 }
 
 int main(int argc, char const *argv[])
@@ -60,6 +84,8 @@ int main(int argc, char const *argv[])
         }
     }
 
+    temporario();
+    
     do
     {
         cout << "Menu: " << endl
