@@ -8,11 +8,18 @@
 
 #include "FileProcessing.hpp"
 #include "Avaliacao.hpp"
-
+#include "Sort.hpp"
 
 int main(int argc, char const *argv[])
 {
     char option;
+
+    int v[] = {4, 1, 3, 2, 16, 9, 10, 14, 8, 7};
+    quickSort(v, 0, 10);
+
+    for (int i = 0; i < 10; i++)
+        cout << v[i] << " ";
+    cout << endl;
 
     ifstream bin("tiktok_app_reviews.bin");
     if (!bin.good())
