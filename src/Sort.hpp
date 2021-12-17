@@ -13,23 +13,23 @@
     https://www.geeksforgeeks.org/internal-details-of-stdsort-in-c/
 */
 
-void swap(int &a, int &b)
+void swap(Register **a, Register **b)
 {
-    int aux = a;
-    a = b;
-    b = aux;
+    Register *aux = *a;
+    *a = *b;
+    *b = aux;
 }
 
 // Insertion Sort
 
-void insertionSort(int *v, int begin, int end)
+void insertionSort(Register **v, int begin, int end)
 {
     for (int i = begin; i < end - 1; i++)
     {
         int j = i + 1;
-        int pivot = v[j];
+        Register *pivot = v[j];
 
-        while (j > 0 && pivot < v[j - 1])
+        while (j > 0 && pivot->getUpvote() < v[j - 1]->getUpvote())
         {
             v[j] = v[j - 1];
             j--;
@@ -41,21 +41,21 @@ void insertionSort(int *v, int begin, int end)
 
 // Quicksort
 
-int partition(int *v, int p, int q)
+int partition(Register **v, int p, int q)
 {
-    int pivot = v[(p + q) / 2];
+    int pivot = v[(p + q) / 2]->getUpvote();
     int i = p, j = q - 1;
 
     while (true)
     {
-        while (v[i] < pivot)
+        while (v[i]->getUpvote() < pivot)
             i++;
-        while (v[j] > pivot)
+        while (v[j]->getUpvote() > pivot)
             j--;
 
         if (i < j)
         {
-            swap(v[i], v[j]);
+            swap(&v[i], &v[j]);
 
             i++;
             j--;
@@ -68,7 +68,7 @@ int partition(int *v, int p, int q)
     return j;
 }
 
-void quickSort(int *v, int p, int r)
+void quickSort(Register **v, int p, int r)
 {
     int q;
     if (p < r)
@@ -81,7 +81,7 @@ void quickSort(int *v, int p, int r)
 
 // Heap sort
 
-void heapify(int *v, int root, int n)
+void heapify(Register **v, int root, int n)
 {
 
     int child;
@@ -91,11 +91,11 @@ void heapify(int *v, int root, int n)
     {
         child = 2 * root + 1;
 
-        if (child < n && v[child] > v[root])
+        if (child < n && v[child]->getUpvote() > v[root]->getUpvote())
             max = child;
 
         child += 1;
-        if (child < n && v[child] > v[max])
+        if (child < n && v[child]->getUpvote() > v[max]->getUpvote())
             max = child;
 
         if (max != root)
@@ -107,7 +107,7 @@ void heapify(int *v, int root, int n)
     }
 }
 
-void heapSort(int *v, int n)
+void heapSort(Register **v, int n)
 {
     // constroi heap
     for (int i = n / 2 - 1; i >= 0; i--)
@@ -121,7 +121,7 @@ void heapSort(int *v, int n)
     }
 }
 
-void heapSort(int *v, int begin, int end)
+void heapSort(Register **v, int begin, int end)
 {
     int size = end - begin;
 
@@ -138,7 +138,7 @@ void heapSort(int *v, int begin, int end)
 
 // Intro sort
 
-void introSortRec(int *v, int begin, int end, int depthLimit)
+void introSortRec(Register **v, int begin, int end, int depthLimit)
 {
     int size = end - begin;
 
@@ -161,7 +161,7 @@ void introSortRec(int *v, int begin, int end, int depthLimit)
     introSortRec(v, pivot + 1, end, depthLimit);
 }
 
-void introSort(int *v, int begin, int end)
+void introSort(Register **v, int begin, int end)
 {
     int depthLimit = 2 * log(end - begin);
 

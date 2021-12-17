@@ -1,10 +1,5 @@
-#include <iostream>
-#include <stdlib.h>
-#include <fstream>
-#include <queue>
 #include <chrono>
 #include <time.h>
-#include <cstdlib>
 
 #include "FileProcessing.hpp"
 #include "Avaliacao.hpp"
@@ -64,17 +59,6 @@ int main(int argc, char const *argv[])
             return 1;
         }
     }
-
-    Register **r;
-    int n = 10;
-
-    r = new Register *[n];
-
-    importacao(r, n);
-
-    for (int i = 0; i < n; i++)
-        cout << r[i]->getUpvote() << " ";
-    cout << endl;
 
     do
     {
