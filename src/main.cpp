@@ -116,19 +116,19 @@ void ordenacao()
             cm1 += contMoves;
             cc1 += contComps;
 
-            cout << "Concluindo em " << t1 << " segundos" << endl
+            cout << "Concluindo em " << elapsed_seconds.count() << " segundos" << endl
                  << endl;
 
             output << "Movimentacoes: " << contMoves << endl;
             output << "Comparacoes: " << contComps << endl;
-            output << "Concluindo em " << t1 << " segundos" << endl
+            output << "Concluindo em " << elapsed_seconds.count() << " segundos" << endl
                    << endl;
             cout << "Heap sort... ";
             output << "Heap sort" << endl;
             contMoves = 0, contComps = 0;
 
             start = std::chrono::system_clock::now();
-            heapSort(v1, 0, n, &contMoves, &contComps);
+            heapSort(v2, 0, n, &contMoves, &contComps);
             end = std::chrono::system_clock::now();
 
             elapsed_seconds = end - start;
@@ -136,12 +136,12 @@ void ordenacao()
             cm2 += contMoves;
             cc2 += contComps;
 
-            cout << "Concluindo em " << t2 << " segundos" << endl
+            cout << "Concluindo em " << elapsed_seconds.count() << " segundos" << endl
                  << endl;
 
             output << "Movimentacoes: " << contMoves << endl;
             output << "Comparacoes: " << contComps << endl;
-            output << "Concluindo em " << t2 << " segundos" << endl
+            output << "Concluindo em " << elapsed_seconds.count() << " segundos" << endl
                    << endl;
 
             cout << "Intro sort... ";
@@ -149,7 +149,7 @@ void ordenacao()
             contMoves = 0, contComps = 0;
 
             start = std::chrono::system_clock::now();
-            introSort(v1, 0, n, &contMoves, &contComps);
+            introSort(v3, 0, n, &contMoves, &contComps);
             end = std::chrono::system_clock::now();
 
             elapsed_seconds = end - start;
@@ -157,11 +157,11 @@ void ordenacao()
             cm3 += contMoves;
             cc3 += contComps;
 
-            cout << "Concluindo em " << t3 << " segundos" << endl
+            cout << "Concluindo em " << elapsed_seconds.count() << " segundos" << endl
                  << endl;
             output << "Movimentacoes: " << contMoves << endl;
             output << "Comparacoes: " << contComps << endl;
-            output << "Concluindo em " << t2 << " segundos" << endl
+            output << "Concluindo em " << elapsed_seconds.count() << " segundos" << endl
                    << endl;
         }
 
@@ -209,7 +209,7 @@ void ordenacao()
 
 void temporario()
 {
-    int n = 10;
+    int n = 100;
     Register **r = createArray(n);
     int contMov = 0, contComp = 0;
     // r = new Register *[n];
@@ -220,7 +220,7 @@ void temporario()
         cout << r[i]->getUpvote() << " ";
     cout << endl;
 
-    introSort(r, 0, n, &contMov, &contComp);
+    heapSort(r, 0, n, &contMov, &contComp);
 
     for (int i = 0; i < n; i++)
         cout << r[i]->getUpvote() << " ";
