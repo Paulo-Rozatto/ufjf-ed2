@@ -5,4 +5,5 @@ archive/
 *.txt
 *.bin
 programa
+src/input.dat
 main
