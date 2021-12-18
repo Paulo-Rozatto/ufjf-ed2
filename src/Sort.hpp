@@ -46,8 +46,19 @@ void insertionSort(Register **v, int begin, int end, int *contMov, int *contComp
 
 int partition(Register **v, int p, int q, int *contMov, int *contComp)
 {
-    int pivot = v[(p + q) / 2]->getUpvote();
-    int i = p, j = q - 1;
+    int i = p, j = q - 1, pivot;
+
+    // mediana de tres
+    int mid = v[(p + q) / 2]->getUpvote();
+    if (v[p]->getUpvote() > v[j]->getUpvote())
+        swap(&v[p], &v[j]);
+    if (v[mid]->getUpvote() > v[j]->getUpvote())
+        swap(&v[mid], &v[j]);
+    if (v[p]->getUpvote() > v[mid]->getUpvote())
+        swap(&v[p], &v[mid]);
+    swap(&v[mid], &v[j]);
+
+    pivot = v[j]->getUpvote();
 
     while (true)
     {
