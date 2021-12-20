@@ -23,7 +23,7 @@ void importacao(Register **registers, int n)
     for (int i = 0; i < n; i++)
     {
         j = rand() % ROWS;
-        // registers[i] = new Register(bin, j);
+        // j = i;
         registers[i]->init(bin, j);
     }
 }
@@ -89,7 +89,7 @@ void ordenacao()
 
         t1 = t2 = t3 = cm1 = cm2 = cm3 = cc1 = cc2 = cc3 = 0;
 
-        cout << "--- Teste para " << n << " valores. ---" << endl;
+        cout << "--- Ordenacao de " << n << " valores. ---" << endl;
         output << "----- " << n << " valores -----" << endl;
 
         for (int i = 0; i < m; i++)
@@ -108,7 +108,7 @@ void ordenacao()
             contMoves = 0, contComps = 0;
 
             start = std::chrono::system_clock::now();
-            quickSort(v1, 0, n, &contMoves, &contComps);
+            quickSort(v1, 0, n - 1, &contMoves, &contComps);
             end = std::chrono::system_clock::now();
 
             elapsed_seconds = end - start;
@@ -128,7 +128,7 @@ void ordenacao()
             contMoves = 0, contComps = 0;
 
             start = std::chrono::system_clock::now();
-            heapSort(v2, 0, n, &contMoves, &contComps);
+            heapSort(v2, 0, n - 1, &contMoves, &contComps);
             end = std::chrono::system_clock::now();
 
             elapsed_seconds = end - start;
@@ -149,7 +149,7 @@ void ordenacao()
             contMoves = 0, contComps = 0;
 
             start = std::chrono::system_clock::now();
-            introSort(v3, 0, n, &contMoves, &contComps);
+            introSort(v3, 0, n - 1, &contMoves, &contComps);
             end = std::chrono::system_clock::now();
 
             elapsed_seconds = end - start;
@@ -167,32 +167,18 @@ void ordenacao()
 
         output << "Médias" << endl;
 
-        // cout << "QuickSort " << endl
-        //      << "Movimentacoes: " << cm1 / (float)m << endl
-        //      << "Comparacoes: " << cc1 / (float)m << endl
-        //      << "Tempo: " << t1 / (float)m << endl
-        //      << endl;
-        // cout << "HeapSort " << endl
-        //      << "Movimentacoes: " << cm2 / (float)m << endl
-        //      << "Comparacoes: " << cc2 / (float)m << endl
-        //      << "Tempo: " << t2 / (float)m << endl
-        //      << endl;
-        // cout << "IntroSort: " << endl
-        //      << "Movimentacoes: " << cm3 / (float)m << endl
-        //      << "Comparacoes: " << cc3 / (float)m << endl
-        //      << "Tempo: " << t3 / (float)m << endl
-        //      << endl;
-
         output << "QuickSort: " << endl
                << "Movimentacoes: " << cm1 / (float)m << endl
                << "Comparacoes: " << cc1 / (float)m << endl
                << "Tempo: " << t1 / (float)m << endl
                << endl;
+
         output << "HeapSort: " << endl
                << "Movimentacoes: " << cm2 / (float)m << endl
                << "Comparacoes: " << cc2 / (float)m << endl
                << "Tempo: " << t2 / (float)m << endl
                << endl;
+
         output << "IntroSort: " << endl
                << "Movimentacoes: " << cm3 / (float)m << endl
                << "Comparacoes: " << cc3 / (float)m << endl
@@ -207,27 +193,123 @@ void ordenacao()
     }
 }
 
-void temporario()
+void testeOrdenacao(Register **v, int n, ofstream &output)
+{
+    Register **v1, **v2, **v3;
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    std::chrono::duration<double> elapsed_seconds;
+    int contMoves = 0, contComps = 0;
+    double t1, t2, t3;
+    int cm1 = 0, cm2 = 0, cm3 = 0, cc1 = 0, cc2 = 0, cc3 = 0;
+
+    v1 = createArray(n);
+    v2 = createArray(n);
+    v3 = createArray(n);
+    copyUpvotes(v, v1, n);
+    copyUpvotes(v, v2, n);
+    copyUpvotes(v, v3, n);
+
+    cout << "--- Teste de ordenacao de " << n << " valores. ---" << endl;
+    output << "----- Teste de ordenacao de " << n << " valores -----" << endl;
+
+    cout << "Quick sort... ";
+    output << "Quick sort" << endl;
+    contMoves = 0, contComps = 0;
+
+    start = std::chrono::system_clock::now();
+    quickSort(v1, 0, n - 1, &contMoves, &contComps);
+    //  quickSort(v1, 0, n - 1,  &contMov, &contComp);
+    end = std::chrono::system_clock::now();
+
+    elapsed_seconds = end - start;
+    t1 += elapsed_seconds.count();
+    cm1 += contMoves;
+    cc1 += contComps;
+
+    cout << "Concluindo em " << elapsed_seconds.count() << " segundos" << endl
+         << endl;
+
+    output << "Movimentacoes: " << contMoves << endl;
+    output << "Comparacoes: " << contComps << endl;
+    output << "Concluindo em " << elapsed_seconds.count() << " segundos" << endl
+           << endl;
+    cout << "Heap sort... ";
+    output << "Heap sort" << endl;
+    contMoves = 0, contComps = 0;
+
+    start = std::chrono::system_clock::now();
+    heapSort(v2, 0, n - 1, &contMoves, &contComps);
+    end = std::chrono::system_clock::now();
+
+    elapsed_seconds = end - start;
+    t2 += elapsed_seconds.count();
+    cm2 += contMoves;
+    cc2 += contComps;
+
+    cout << "Concluindo em " << elapsed_seconds.count() << " segundos" << endl
+         << endl;
+
+    output << "Movimentacoes: " << contMoves << endl;
+    output << "Comparacoes: " << contComps << endl;
+    output << "Concluindo em " << elapsed_seconds.count() << " segundos" << endl
+           << endl;
+
+    cout << "Intro sort... ";
+    output << "Intro sort" << endl;
+    contMoves = 0, contComps = 0;
+
+    start = std::chrono::system_clock::now();
+    introSort(v3, 0, n - 1, &contMoves, &contComps);
+    end = std::chrono::system_clock::now();
+
+    elapsed_seconds = end - start;
+    t3 += elapsed_seconds.count();
+    cm3 += contMoves;
+    cc3 += contComps;
+
+    cout << "Concluindo em " << elapsed_seconds.count() << " segundos" << endl
+         << endl;
+    output << "Movimentacoes: " << contMoves << endl;
+    output << "Comparacoes: " << contComps << endl;
+    output << "Concluindo em " << elapsed_seconds.count() << " segundos" << endl
+           << endl;
+
+    output << "Valores originais: ";
+    for (int i = 0; i < n; i++)
+        output << v[i]->getUpvote() << " ";
+    output << endl; 
+
+    output << "Ordenado por Quick Sort: ";
+    for (int i = 0; i < n; i++)
+        output << v1[i]->getUpvote() << " ";
+    output << endl;
+
+    output << "Ordenado por Heap Sort:  ";
+    for (int i = 0; i < n; i++)
+        output << v2[i]->getUpvote() << " ";
+    output << endl;
+
+    output << "Ordenado por Intro Sort: ";
+    for (int i = 0; i < n; i++)
+        output << v3[i]->getUpvote() << " ";
+    output << endl;
+
+    output << "----- Fim Teste de ordenacao de ordenacao -----" << endl;
+
+    deleteArray(v1, n);
+    deleteArray(v2, n);
+    deleteArray(v3, n);
+}
+
+void teste()
 {
     int n = 100;
     Register **r = createArray(n);
-    int contMov = 0, contComp = 0;
-    // r = new Register *[n];
+    ofstream output("teste.txt");
 
     importacao(r, n);
 
-    for (int i = 0; i < n; i++)
-        cout << r[i]->getUpvote() << " ";
-    cout << endl;
-
-    heapSort(r, 0, n, &contMov, &contComp);
-
-    for (int i = 0; i < n; i++)
-        cout << r[i]->getUpvote() << " ";
-    cout << endl;
-
-    cout << "Mov: " << contMov << " - "
-         << "Comp: " << contComp << endl;
+    testeOrdenacao(r, n, output);
 }
 
 int main(int argc, char const *argv[])
@@ -290,7 +372,7 @@ int main(int argc, char const *argv[])
             cout << "A fazer..." << endl;
             break;
         case '3':
-            cout << "A fazer..." << endl;
+            teste();
             break;
         default:
             cout << "Opcao invalida" << endl;

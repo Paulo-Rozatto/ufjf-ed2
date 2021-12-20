@@ -24,7 +24,7 @@ void swap(Register **a, Register **b)
 
 void insertionSort(Register **v, int begin, int end, int *contMov, int *contComp)
 {
-    for (int i = begin; i < end - 1; i++)
+    for (int i = begin; i < end; i++)
     {
         int j = i + 1;
         Register *pivot = v[j];
@@ -46,19 +46,24 @@ void insertionSort(Register **v, int begin, int end, int *contMov, int *contComp
 
 int partition(Register **v, int p, int q, int *contMov, int *contComp)
 {
-    int i = p, j = q - 1, pivot;
+    int i = p, j = q, pivot;
+    // int pivot = v[(p + q) / 2]->getUpvote();
 
     // mediana de tres
-    int mid = v[(p + q) / 2]->getUpvote();
-    if (v[p]->getUpvote() > v[j]->getUpvote())
-        swap(&v[p], &v[j]);
-    if (v[mid]->getUpvote() > v[j]->getUpvote())
-        swap(&v[mid], &v[j]);
+    int mid = (p + q) / 2;
+
+    if (v[p]->getUpvote() > v[j - 1]->getUpvote())
+        swap(&v[p], &v[j - 1]);
+
+    if (v[mid]->getUpvote() > v[j - 1]->getUpvote())
+        swap(&v[mid], &v[j - 1]);
+
     if (v[p]->getUpvote() > v[mid]->getUpvote())
         swap(&v[p], &v[mid]);
-    swap(&v[mid], &v[j]);
 
-    pivot = v[j]->getUpvote();
+    swap(&v[mid], &v[j - 1]);
+
+    pivot = v[j - 1]->getUpvote();
 
     while (true)
     {
@@ -76,13 +81,14 @@ int partition(Register **v, int p, int q, int *contMov, int *contComp)
             *contComp += 1;
         }
 
-        if (i < j)
+        if (i <= j)
         {
             swap(&v[i], &v[j]);
             *contMov += 1;
-
+            // if (i < q)
             i++;
-            j--;
+            if (j > p)
+                j--;
         }
         else
         {
@@ -143,33 +149,19 @@ void heapify(Register **v, int root, int n, int *contMov, int *contComp)
     }
 }
 
-void heapSort(Register **v, int n, int *contMov, int *contComp)
-{
-    // constroi heap
-    for (int i = n / 2 - 1; i >= 0; i--)
-        heapify(v, i, n, contMov, contComp);
-
-    while (n > 0)
-    {
-        n--;
-        swap(v[0], v[n]);
-        *contMov += 1;
-        heapify(v, 0, n, contMov, contComp);
-    }
-}
-
 void heapSort(Register **v, int begin, int end, int *contMov, int *contComp)
 {
     int size = end - begin;
 
     for (int i = size / 2 - 1 + begin; i >= begin; i--)
-        heapify(v, i, end, contMov, contComp);
+        heapify(v, i, end + 1, contMov, contComp);
 
     while (end > begin)
     {
-        end--;
         swap(v[begin], v[end]);
         heapify(v, begin, end, contMov, contComp);
+        *contMov += 1;
+        end--;
     }
 }
 
@@ -191,6 +183,7 @@ void introSortRec(Register **v, int begin, int end, int depthLimit, int *contMov
         return;
     }
 
+    // int pivot = partition(v, begin, end, contMov, contComp);
     int pivot = partition(v, begin, end, contMov, contComp);
     depthLimit -= 1;
 
