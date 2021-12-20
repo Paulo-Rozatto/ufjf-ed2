@@ -294,7 +294,7 @@ void testeOrdenacao(Register **v, int n, ofstream &output)
         output << v3[i]->getUpvote() << " ";
     output << endl;
 
-    output << "----- Fim Teste de ordenacao de ordenacao -----" << endl;
+    output << "----- Fim teste de ordenacao -----" << endl;
 
     deleteArray(v1, n);
     deleteArray(v2, n);
@@ -310,6 +310,9 @@ void teste()
     importacao(r, n);
 
     testeOrdenacao(r, n, output);
+    // viria aqui o testeHash(array, n, arquivo_saida)
+
+    deleteArray(r, n);
 }
 
 int main(int argc, char const *argv[])
