@@ -22,6 +22,7 @@ public:
     void print(fstream &file);
 
     int getUpvote() { return upvote; };
+    int *getVersion() { return version; };
     void setUpvote(int value) { this->upvote = value; }
 };
 #endif

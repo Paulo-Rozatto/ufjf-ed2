@@ -198,4 +198,232 @@ void introSort(Register **v, int begin, int end, int *contMov, int *contComp)
     introSortRec(v, begin, end, depthLimit, contMov, contComp);
 }
 
+
+// Intro sort para a tabela hash
+
+typedef struct {
+    int version[3];
+    int quant = 0;
+}versao;
+
+void swapHash(versao **a, versao **b)
+{
+    versao *aux = *a;
+    *a = *b;
+    *b = aux;
+}
+
+int partitionHash(versao **v, int p, int q, int *contMov, int *contComp)
+{
+    int i = p, j = q - 1, pivot;
+
+    // mediana de tres
+    int mid = v[(p + q) / 2]->quant;
+    if (v[p]->quant > v[j]->quant)
+        swapHash(&v[p], &v[j]);
+    if (v[mid]->quant > v[j]->quant)
+        swapHash(&v[mid], &v[j]);
+    if (v[p]->quant > v[mid]->quant)
+        swapHash(&v[p], &v[mid]);
+    swapHash(&v[mid], &v[j]);
+
+    pivot = v[j]->quant;
+
+    while (true)
+    {
+        *contComp += 1;
+        while (v[i]->quant < pivot)
+        {
+            i++;
+            *contComp += 1;
+        }
+
+        *contComp += 1;
+        while (v[j]->quant > pivot)
+        {
+            j--;
+            *contComp += 1;
+        }
+
+        if (i < j)
+        {
+            swapHash(&v[i], &v[j]);
+            *contMov += 1;
+
+            i++;
+            j--;
+        }
+        else
+        {
+            break;
+        }
+    }
+    return j;
+}
+
+void quickSortHash(versao **v, int p, int r, int *contMov, int *contComp)
+{
+    int q;
+    if (p < r)
+    {
+        q = partitionHash(v, p, r, contMov, contComp);
+        quickSortHash(v, p, q, contMov, contComp);
+        quickSortHash(v, q + 1, r, contMov, contComp);
+    }
+    cout << v[0]->quant << endl;
+}
+
+/*
+int partitionHash(versao **v, int p, int q, int *contMov, int *contComp)
+{
+    int i = p, j = q - 1, pivot;
+
+    // mediana de tres
+    int mid = v[(p + q) / 2]->quant;
+    if (v[p]->quant > v[j]->quant)
+        swapHash(&v[p], &v[j]);
+    if (v[mid]->quant > v[j]->quant)
+        swapHash(&v[mid], &v[j]);
+    if (v[p]->quant > v[mid]->quant)
+        swapHash(&v[p], &v[mid]);
+    swapHash(&v[mid], &v[j]);
+
+    pivot = v[j]->quant;
+
+    while (true)
+    {
+        *contComp += 1;
+        while (v[i]->quant < pivot)
+        {
+            i++;
+            *contComp += 1;
+        }
+
+        *contComp += 1;
+        while (v[j]->quant > pivot)
+        {
+            j--;
+            *contComp += 1;
+        }
+
+        if (i < j)
+        {
+            swapHash(&v[i], &v[j]);
+            *contMov += 1;
+
+            i++;
+            j--;
+        }
+        else
+        {
+            break;
+        }
+    }
+    return j;
+}
+
+void insertionSortHash(versao **v, int begin, int end, int *contMov, int *contComp)
+{
+    for (int i = begin; i < end - 1; i++)
+    {
+        int j = i + 1;
+        versao *pivot = v[j];
+
+        *contComp += 1;
+        while (j > 0 && pivot->quant < v[j - 1]->quant)
+        {
+            v[j] = v[j - 1];
+            *contComp += 1;
+            *contMov += 1;
+            j--;
+        }
+
+        v[j] = pivot;
+    }
+}
+
+void heapifyHash(versao **v, int root, int n, int *contMov, int *contComp)
+{
+
+    int child;
+    int max = root; // assume que a raiz e o maior valor
+
+    while (root < n)
+    {
+        child = 2 * root + 1;
+
+        *contComp += 1;
+        if (child < n && v[child]->quant > v[child]->quant)
+        {
+            max = child;
+            *contComp += 1;
+        }
+
+        child += 1;
+
+        *contComp += 1;
+        if (child < n && v[child]->quant > v[child]->quant)
+        {
+            max = child;
+            *contComp += 1;
+        }
+
+        if (max != root)
+        {
+            swapHash(&v[root], &v[max]);
+            *contMov += 1;
+        }
+        else
+            break;
+
+        root = max;
+    }
+}
+
+void heapSortHash(versao **v, int begin, int end, int *contMov, int *contComp)
+{
+    int size = end - begin;
+
+    for (int i = size / 2 - 1 + begin; i >= begin; i--)
+        heapifyHash(v, i, end, contMov, contComp);
+
+    while (end > begin)
+    {   
+        end--;
+        swapHash(&v[begin], &v[end]);
+        heapifyHash(v, begin, end, contMov, contComp);
+    }
+}
+
+void introSortRecHash(versao **v, int begin, int end, int depthLimit, int *contMov, int *contComp)
+{
+    int size = end - begin;
+
+    if (size < 16)
+    {
+        insertionSortHash(v, 0, 1000000, contMov, contComp);
+        return;
+    }
+
+    if (depthLimit == 0)
+    {
+        heapSortHash(v, begin, end, contMov, contComp);
+        return;
+    }
+
+    int pivot = partitionHash(v, begin, end, contMov, contComp);
+    depthLimit -= 1;
+
+    introSortRecHash(v, begin, pivot, depthLimit, contMov, contComp);
+    introSortRecHash(v, pivot + 1, end, depthLimit, contMov, contComp);
+}
+
+void introSortHash(versao **v, int begin, int end, int *contMov, int *contComp)
+{
+    int depthLimit = 2 * log(end - begin);
+
+    introSortRecHash(v, begin, end, depthLimit, contMov, contComp);
+}
+*/
+
 #endif
