@@ -15,21 +15,15 @@ public:
     // template <T>
     // friend class BTree;
 
-    // public:
     void splitChild(int i, BTreeNode *c);
-    BTreeNode(int M);
     BTreeNode(int M, bool isLeaf);
     ~BTreeNode(){};
-    // void insert(T key);
     BTreeNode* insert(T key);
-    void show();
-    bool leaf() { return isLeaf; };
     BTreeNode* insertLocal(T key);
+    void show();
 
     private:
     BTreeNode* split(T key);
-
-
 };
 
 #endif

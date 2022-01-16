@@ -75,8 +75,6 @@ void arvB()
         cout << "Child " << (i + 1) << ": ";
         t.root->children[i]->show();
     }
-    // t.root->children[1]->show();
-    // b.splitChild(0, &b);
 }
 
 void teste()
