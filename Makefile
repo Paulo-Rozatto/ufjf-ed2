@@ -1,2 +1,2 @@
 compile:
-	g++ -g src/*.cpp -o programa
+	g++ -g src/*.cpp -o programa -std=c++17
