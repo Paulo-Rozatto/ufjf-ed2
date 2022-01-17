@@ -683,17 +683,18 @@ void arvoreVP()
         output.close();
         return;
     }
-
-    Register **r = createArray(10);
-    importacao(r, 10);
+    int n = 1000000;
+    Register **r = createArray(n);
+    importacao(r, n);
     
     ArvoreVP arv;
-    for(int i = 0; i < 10; i++)
+    for(int i = 0; i < n; i++)
     {
         string idReview = r[i]->getID();
         arv.insere(idReview, i);
     }
-    arv.imprimePorNivel();
+    cout << arv.getComparacaoInsercao() << " comparacaoInsercao " << endl;
+    //arv.imprimePorNivel();
 }
 
 void teste()

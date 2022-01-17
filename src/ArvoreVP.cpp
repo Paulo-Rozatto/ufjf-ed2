@@ -31,6 +31,8 @@ NoVP * ArvoreVP::libera(NoVP * p)
 
 bool ArvoreVP::busca(string chave)
 {
+    buscaAux(raiz, chave); 
+    cout << comparacaoBusca << "comparacaoBusca " << comparacaoInsercao << "comparacaoInsercao " << endl;
     return buscaAux(raiz, chave); 
 }
 
@@ -58,12 +60,14 @@ bool ArvoreVP::buscaAux(NoVP * p, string chave)
     {
         return buscaAux(p->getDir(), chave);
     }
+    return false;
 }
 
 void ArvoreVP::insere(string chave, int pos)
 {
     balanceado = false;
     raiz = insereAux(raiz, chave, pos);
+
 }
 
 NoVP * ArvoreVP::insereAux(NoVP * p, string chave, int pos)
