@@ -1,7 +1,6 @@
 #include "BTreeNode.hpp"
 #include <iostream>
 
-
 template <class T>
 BTreeNode<T>::BTreeNode(int M, bool isLeaf)
 {
@@ -34,7 +33,7 @@ BTreeNode<T> *BTreeNode<T>::split(T key)
     {
         for (i = 0; i < M / 2; i++)
         {
-            newNode->children[i] = children[i + M / 2];
+            newNode->children[i] = children[i + M / 2 + 1];
         }
     }
 
@@ -47,7 +46,6 @@ BTreeNode<T> *BTreeNode<T>::insertLocal(T key)
     T aux;
     int i;
 
-    // T h1[] = {keys[0], keys[1], keys[2], keys[3]};
     i = 0;
     while (i < currKeys && key > keys[i])
         i++;
@@ -61,8 +59,6 @@ BTreeNode<T> *BTreeNode<T>::insertLocal(T key)
         key = aux;
         i++;
     }
-
-    // T h2[] = {keys[0], keys[1], keys[2], keys[3]};
 
     // Se estiver cheio, um overflow ocorreu
     if (currKeys == M - 1)
@@ -116,9 +112,12 @@ BTreeNode<T> *BTreeNode<T>::insert(T key)
         // Se este node tambem esta cheio
         if (currKeys == M - 1)
         {
+
             BTreeNode<T> *newNode = insertLocal(newKey);
 
-            for (int j = 0; i <= newNode->currKeys; i++)
+            // Insere a nova chave no node partido
+            // Como houve a divisao e dois ponteiros ficam no primeiro node, diminui o index em 2
+            for (int j = i - 2; j <= newNode->currKeys; j++)
             {
                 aux = newNode->children[j];
                 newNode->children[j] = newChild;
@@ -145,12 +144,46 @@ BTreeNode<T> *BTreeNode<T>::insert(T key)
 }
 
 template <class T>
+BTreeNode<T> *BTreeNode<T>::search(T key)
+{
+    int i = 0;
+    while (i < currKeys && key > keys[i])
+    {
+        i++;
+    }
+
+    if (keys[i] == key)
+        return this;
+
+    if (isLeaf)
+        return nullptr;
+
+    return children[i]->search(key);
+}
+
+template <class T>
 void BTreeNode<T>::show()
 {
     for (int i = 0; i < currKeys; i++)
         std::cout << keys[i] << " - ";
 
     std::cout << std::endl;
+
+    // // There are n keys and n+1 children, traverse through n keys
+    // // and first n children
+    // int i;
+    // for (i = 0; i < currKeys; i++)
+    // {
+    //     // If this is not leaf, then before printing key[i],
+    //     // traverse the subtree rooted with child C[i].
+    //     if (isLeaf == false)
+    //         children[i]->show();
+    //     std::cout << " " << keys[i];
+    // }
+
+    // // Print the subtree rooted with last child
+    // if (isLeaf == false)
+    //     children[i]->show();
 }
 
 template class BTreeNode<int>;

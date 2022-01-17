@@ -69,12 +69,20 @@ void arvB()
     cout << endl
          << "Root: ";
     t.root->show();
+    cout << endl;
 
     for (int i = 0; i <= t.root->currKeys; i++)
     {
         cout << "Child " << (i + 1) << ": ";
         t.root->children[i]->show();
     }
+
+    int key = 17;
+
+    cout << "Key: " << key << endl;
+    BTreeNode<int> *s = t.root->search(key);
+
+    cout << "Encontrado: " << (s == nullptr ? "N" : "Y") << endl;
 }
 
 void teste()
@@ -139,8 +147,7 @@ int main(int argc, char const *argv[])
              << "0 - Sair" << endl
              << "Digite a opcao: ";
 
-        // cin >> option;
-        option = '2';
+        cin >> option;
 
         switch (option)
         {
