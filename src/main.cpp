@@ -30,7 +30,7 @@ void importacao(Register **registers, int n)
     {
         j = rand() % ROWS;
         // j = i;
-        registers[i]->init(bin, j);
+        registers[i]->initIdOnly(bin, j);
     }
 }
 
@@ -89,15 +89,15 @@ void arvB()
 
 void arvoreVP()
 {
-    ifstream input("input.dat");
+    // ifstream input("input.dat");
     ofstream output("saida_hash.txt");
 
-    if(!input.good())
-    {
-        cout << "Arquivo input.dat nao encontrado." << endl;
-        input.close();
-        return;
-    }
+    // if(!input.good())
+    // {
+    //     cout << "Arquivo input.dat nao encontrado." << endl;
+    //     input.close();
+    //     return;
+    // }
 
     if(!output.good())
     {
@@ -113,7 +113,7 @@ void arvoreVP()
     for(int i = 0; i < n; i++)
     {
         string idReview = r[i]->getID();
-        arv.insere(idReview, i);
+        arv.insere(idReview, r[i]->getIndex());
     }
     cout << arv.getComparacaoInsercao() << " comparacaoInsercao " << endl;
     //arv.imprimePorNivel();
@@ -177,7 +177,6 @@ int main(int argc, char const *argv[])
         cout << "Menu: " << endl
              << "1 - Arvore Vermelho e Preto: " << endl
              << "2 - Arvore B" << endl
-             << "3 - Modulo de teste:" << endl
              << "0 - Sair" << endl
              << "Digite a opcao: ";
 
