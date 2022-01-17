@@ -23,6 +23,7 @@ public:
 
     int getUpvote() { return upvote; };
     int *getVersion() { return version; };
+    char *getID() { return id; };
     void setUpvote(int value) { this->upvote = value; }
 };
 #endif

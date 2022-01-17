@@ -3,10 +3,12 @@
 #include <chrono>
 #include <time.h>
 #include <fstream>
+#include <string.h>
 
 #include "FileProcessing.hpp"
 #include "Avaliacao.hpp"
 #include "Sort.hpp"
+#include "ArvoreVP.h"
 
 using namespace std;
 
@@ -344,10 +346,6 @@ void deleteTabela(versao **tabela, int n)
     delete[] tabela;
 }
 
-
-
-
-
 bool verificaVersao(versao **tabela, int indice, int vet[3])
 {
     if(tabela[indice]->version[0] == vet[0]
@@ -667,6 +665,37 @@ void tabelaHash()
     }
 }
 
+void arvoreVP()
+{
+    ifstream input("input.dat");
+    ofstream output("saida_hash.txt");
+
+    if(!input.good())
+    {
+        cout << "Arquivo input.dat nao encontrado." << endl;
+        input.close();
+        return;
+    }
+
+    if(!output.good())
+    {
+        cout << "Arquivo saida_hash.txt nao pode ser criado" << endl;
+        output.close();
+        return;
+    }
+
+    Register **r = createArray(10);
+    importacao(r, 10);
+    
+    ArvoreVP arv;
+    for(int i = 0; i < 10; i++)
+    {
+        string idReview = r[i]->getID();
+        arv.insere(idReview, i);
+    }
+    arv.imprimePorNivel();
+}
+
 void teste()
 {
     int n = 100;
@@ -736,7 +765,7 @@ int main(int argc, char const *argv[])
         case '0':
             break;
         case '1':
-            ordenacao();
+            arvoreVP();
             break;
         case '2':
             tabelaHash();
