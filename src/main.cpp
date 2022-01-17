@@ -683,40 +683,56 @@ void arvoreVP()
         output.close();
         return;
     }
-    int n = 1000000;
-    Register **r = createArray(n);
-    importacao(r, n);
-    std::chrono::time_point<std::chrono::system_clock> start, end, start2, end2;
-
-    
-    start = std::chrono::system_clock::now();
-    ArvoreVP arv;
-    for(int i = 0; i < n; i++)
+    for(int i = 0; i < 3; i++)
     {
-        string idReview = r[i]->getID();
-        arv.insere(idReview, i);
+        cout << "M" << (i+1) << endl;
+        output << "- M" << (i + 1) << " -" << endl;
+        int n = 1000000;
+        Register **r = createArray(n);
+        importacao(r, n);
+        std::chrono::time_point<std::chrono::system_clock> start, end, start2, end2;
+
+        
+        start = std::chrono::system_clock::now();
+        ArvoreVP arv;
+        for(int i = 0; i < n; i++)
+        {
+            string idReview = r[i]->getID();
+            arv.insere(idReview, i);
+        }
+        end = std::chrono::system_clock::now();
+
+        std::chrono::duration<double> elapsed_seconds = end - start;
+        cout << "Árvore gerada em " << elapsed_seconds.count() << "s" << endl;
+        cout << arv.getComparacaoInsercao() << " comparacaoInsercao " << endl;
+        output << "Árvore gerada em " << elapsed_seconds.count() << "s" << endl;
+        output << arv.getComparacaoInsercao() << " Comparações de Inserção" << endl;
+
+        //busca
+        fstream bin;
+        bin.open("tiktok_app_reviews.bin", ios::in | ios::binary);
+        string aux;
+        srand(time(NULL));
+        start = std::chrono::system_clock::now();
+        int j;
+        Register **review = createArray(100);
+        for(int i = 0; i < 100; i++)
+        {
+            j = rand() % ROWS;
+            review[i]->init(bin, j);
+            aux = review[0]->getID();
+            arv.busca(aux);
+        }
+        end = std::chrono::system_clock::now();
+
+        elapsed_seconds = end - start;
+        cout << "Busca de 100 reviews feita em " << elapsed_seconds.count() << "s" << endl;
+        output << "Busca de 100 reviews feita em " << elapsed_seconds.count() << "s" << endl;
+        output << arv.getComparacaoBusca() << " Comparações de busca" << endl;
+        deleteArray(r, n);
+        deleteArray(review,100);
     }
-    end = std::chrono::system_clock::now();
 
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    cout << "Árvore gerada em " << elapsed_seconds.count() << "s" << endl;
-    cout << arv.getComparacaoInsercao() << " comparacaoInsercao " << endl;
-
-    //busca
-    string aux;
-    srand(time(NULL));
-    start = std::chrono::system_clock::now();
-    int j;
-    for(int i = 0; i < 100; i++)
-    {
-        j = rand() % ROWS;
-        aux = r[j]->getID();
-        arv.busca(aux);
-    }
-    end = std::chrono::system_clock::now();
-
-    elapsed_seconds = end - start;
-    cout << "Busca de 100 reviews feita em " << elapsed_seconds.count() << "s" << endl;
 
 
     //arv.imprimePorNivel();
