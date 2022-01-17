@@ -3,13 +3,14 @@
 
 #include "BTreeNode.hpp"
 
-template <class T, int M>
+template <class T>
 class BTree
 {
 private:
+    int M;
 public:
     BTreeNode<T> *root;
-    BTree(/* args */);
+    BTree(int M);
     ~BTree(){};
     void insert(T key);
 };

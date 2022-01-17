@@ -8,6 +8,7 @@
 #include "FileProcessing.hpp"
 #include "Sort.hpp"
 #include "BTree.hpp"
+#include "BKey.hpp"
 // #include "BTreeNode.hpp"
 #include "ArvoreVP.h"
 
@@ -45,44 +46,54 @@ Register **createArray(int n)
     return v;
 }
 
+void loadBKeys()
+{
+}
+
 void arvB()
 {
-    // BTreeNode<int> b(4, true);
-    BTree<int, 5> t;
+    // BTree<BKey> t(3);
+    BTree<int> t(6);
+    int size = 1000000;
 
-    t.insert(4);
-    t.insert(2);
-    t.insert(1);
-    t.insert(5);
-    t.insert(3);
-    t.insert(6);
-    t.insert(7);
-    t.insert(8);
-    t.insert(9);
-    t.insert(11);
-    t.insert(12);
-    t.insert(13);
-    t.insert(14);
-    t.insert(15);
-    t.insert(16);
-    t.insert(17);
-    t.insert(18);
+    Register **r = createArray(size);
+    // importacao(r, size);
+    char nu[4] = {'n', 'a', 'd', '\0'};
+
+    BKey *search;
+
+    for (int i = 1; i <= size; i++)
+    {
+        // sprintf(nu, "%d", i);
+        BKey key(i, nu);
+        t.insert(size - i);
+
+    }
 
     cout << endl
          << "Root: ";
     t.root->show();
     cout << endl;
+    BTreeNode<int> *b;
 
-    for (int i = 0; i <= t.root->currKeys; i++)
-    {
-        cout << "Child " << (i + 1) << ": ";
-        t.root->children[i]->show();
-    }
+    // for (int i = 0; i <= t.root->currKeys; i++)
+    // {
+    //     cout << "Child " << (i + 1) << ": ";
+    //     t.root->children[i]->show();
 
-    int key = 17;
+    //     // for (int j = 0; j <= (t.root->children[i]->currKeys); j++)
+    //     // {
+    //     //     b = t.root->children[i]->children[j];
+    //     //     t.root->children[i]->children[j]->show();
+    //     // }
+    // }
+    // t.root->children[1]->children[0]->show();
+    // t.root->children[1]->children[1]->show();
 
-    cout << "Key: " << key << endl;
-    BTreeNode<int> *s = t.root->search(key);
+    // int key = 17;
+
+    // cout << "Key: " << search->getId() << endl;
+    BTreeNode<int> *s = t.root->search(388071);
 
     cout << "Encontrado: " << (s == nullptr ? "N" : "Y") << endl;
 }
@@ -99,7 +110,7 @@ void arvoreVP()
     //     return;
     // }
 
-    if(!output.good())
+    if (!output.good())
     {
         cout << "Arquivo saida_hash.txt nao pode ser criado" << endl;
         output.close();
@@ -108,9 +119,9 @@ void arvoreVP()
     int n = 1000000;
     Register **r = createArray(n);
     importacao(r, n);
-    
+
     ArvoreVP arv;
-    for(int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
         string idReview = r[i]->getID();
         arv.insere(idReview, r[i]->getIndex());

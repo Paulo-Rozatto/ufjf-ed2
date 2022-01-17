@@ -21,6 +21,7 @@ public:
     BTreeNode* insertLocal(T key);
     BTreeNode *search(T key);
     void show();
+    BTreeNode* split(int i, BTreeNode *child);
 
     private:
     BTreeNode* split(T key);

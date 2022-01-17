@@ -22,8 +22,8 @@ Register::~Register()
 
 void Register::initIdOnly(fstream &file, int i)
 {
-    this->index = i;
-    this->review = nullptr;
+    index = i;
+    review = nullptr;
 
     const int ROW_SIZE = 89 * sizeof(char) + sizeof(int) + sizeof(int) + 3 * sizeof(int) + 19 * sizeof(char);
     i *= ROW_SIZE;

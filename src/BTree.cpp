@@ -1,38 +1,46 @@
 #include "BTree.hpp"
+#include "BKey.hpp"
 #include <iostream>
 
-template <class T, int M>
-BTree<T, M>::BTree()
+template <class T>
+BTree<T>::BTree(int M)
 {
     root = nullptr;
+    this->M = M;
 }
 
-template <class T, int M>
-void BTree<T, M>::insert(T key)
+template <class T>
+void BTree<T>::insert(T key)
 {
     if (root == nullptr)
     {
         root = new BTreeNode<T>(M, true);
-        root->insert(key);
-        return;
+        root->keys[0] = key;
+        root->currKeys = 1;
+    }
+    else if (root->currKeys == M - 1)
+    {
+        BTreeNode<T> *newRoot = new BTreeNode<T>(M, false);
+
+        newRoot->children[0] = root;
+
+        newRoot->split(0, root);
+
+        // newRoot->insert(key);
+
+        root = newRoot;
+
+        if (root->keys[0] < key)
+            root->children[1]->insert(key);
+        else
+            root->children[0]->insert(key);
     }
     else
     {
-        BTreeNode<T> *newChild = root->insert(key);
-
-        if (newChild != nullptr)
-        {
-            BTreeNode<T> *newRoot = new BTreeNode<T>(M, false);
-
-            newRoot->insertLocal(root->keys[(M - 1) / 2]);
-            newRoot->children[0] = root;
-            newRoot->children[1] = newChild;
-            newRoot->currKeys = 1;
-
-            root = newRoot;
-        }
-
+        root->insert(key);
     }
 }
 
-template class BTree<int, 5>;
+// template class BTree<BKey>;
+template class BTree<int>;
+// template class BTree<int, 5>;

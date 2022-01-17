@@ -1,4 +1,5 @@
 #include "BTreeNode.hpp"
+#include "BKey.hpp"
 #include <iostream>
 
 template <class T>
@@ -13,131 +14,176 @@ BTreeNode<T>::BTreeNode(int M, bool isLeaf)
 }
 
 template <class T>
-BTreeNode<T> *BTreeNode<T>::split(T key)
+BTreeNode<T> *BTreeNode<T>::split(int i, BTreeNode *child)
 {
-    BTreeNode<T> *newNode = new BTreeNode<T>(this->M, isLeaf);
+    // // A metade do tamanho maximo precisa ser usado varias vezes, entao salva numa variavel
+    // int half = M / 2 + 1;
 
-    int i;
-    for (i = 0; i < (M - 2) / 2; i++)
+    // // Cria novo node
+    // BTreeNode<T> *newChild = new BTreeNode<T>(child->M, child->isLeaf);
+
+    // // O novo node tera metada da capacidade - 1 chaves
+    // newChild->currKeys = half - 1;
+
+    // for (int j = 0; j < half - 1; j++)
+    // {
+    //     newChild->keys[j] = child->keys[j + half];
+    // }
+
+    // if (!child->isLeaf)
+    // {
+    //     for (int j = 0; j < half; j++)
+    //     {
+    //         newChild->children[j] = child->children[j + half];
+    //     }
+    // }
+
+    // child->currKeys = half - 1;
+
+    // // abre espaco a direita de child para abrigar o newChild
+    // for (int j = currKeys; j >= i + 1; j--)
+    // {
+    //     this->children[currKeys + 1] = this->children[currKeys];
+    // }
+
+    // // insere newChild
+    // this->children[i + 1] = newChild;
+
+    // // Precisa-se entao inserir a key mediana de child
+    // // Pela implementacao do insert, a mediana the child vai ser menor que a key na posicao i e maior que da i - 1
+    // // Entao mova todas keys para direita a partir de i
+    // for (int j = currKeys - 1; j >= i; j--)
+    //     this->keys[j + 1] = this->keys[j];
+
+    // // Insira a mediana de child na posicao i
+    // this->keys[i] = child->keys[half - 1];
+
+    // // incrementa o contador de chaves
+    // this->currKeys++;
+
+    // Create a new node which is going to store (md-1) keys
+    // of child
+    int md = M / 2;
+
+    BTreeNode *newChild = new BTreeNode(child->M, child->isLeaf);
+    newChild->currKeys = md - 1;
+
+    // Copy the last (md-1) keys of child to newChild
+    for (int j = 0; j < md - 1; j++)
+        newChild->keys[j] = child->keys[j + md];
+
+    // Copy the last md children of child to newChild
+    if (child->isLeaf == false)
     {
-        newNode->keys[i] = keys[i + (M - 1) / 2 + 1];
-    }
-    // guarda no novo node o overflow que esta guardado em key
-    newNode->keys[i] = key;
-    newNode->currKeys = M / 2;
-
-    currKeys /= 2;
-
-    // Se nao for folha, partilha ponteiros para filhos
-    if (!isLeaf)
-    {
-        for (i = 0; i < M / 2; i++)
-        {
-            newNode->children[i] = children[i + M / 2 + 1];
-        }
+        for (int j = 0; j < md; j++)
+            newChild->children[j] = child->children[j + md];
     }
 
-    return newNode;
-}
+    // Reduce the number of keys in child
+    child->currKeys = md - 1;
 
-template <class T>
-BTreeNode<T> *BTreeNode<T>::insertLocal(T key)
-{
-    T aux;
-    int i;
+    // Since this node is going to have a new child,
+    // create space of new child
+    for (int j = currKeys; j >= i + 1; j--)
+        children[j + 1] = children[j];
 
-    i = 0;
-    while (i < currKeys && key > keys[i])
-        i++;
+    // Link the new child to this node
+    children[i + 1] = newChild;
 
-    // Insere a chave e desloca para a direita
-    // Caso haja overflow, ele estara guardado na variavel key
-    while (i <= currKeys && i < M - 1)
-    {
-        aux = keys[i];
-        keys[i] = key;
-        key = aux;
-        i++;
-    }
+    // A key of child will move to this node. Find the location of
+    // new key and move all greater keys one space ahead
+    for (int j = currKeys - 1; j >= i; j--)
+        keys[j + 1] = keys[j];
 
-    // Se estiver cheio, um overflow ocorreu
-    if (currKeys == M - 1)
-    {
-        // Particiona este node e guarde a referencia para o novo node criado
-        // Passa o overflow como parametro
-        BTreeNode *newNode = split(key);
+    // Copy the middle key of child to this node
+    keys[i] = child->keys[md - 1];
 
-        // Retorna ponteiro para novo node
-        return newNode;
+    // Increment count of keys in this node
+    currKeys = currKeys + 1;
 
-        // Nao eh preciso retornar a key do meio pois ela ainda esta salva no vetor de keys
-        // E o node pai sabe onde acessar
-    }
-    else
-    {
-        currKeys++;
-        return nullptr;
-    }
+    return nullptr;
 }
 
 template <class T>
 BTreeNode<T> *BTreeNode<T>::insert(T key)
 {
-    BTreeNode *newChild;
+    // int i = currKeys - 1;
 
-    // Se eh uma folha, nao eh preciso verificar filhos
-    if (isLeaf)
+    // if (this->isLeaf)
+    // {
+    //     // Encontre a posicao onde inserir a chave
+    //     while (i >= 0 && this->keys[i] > key)
+    //     {
+    //         this->keys[i + 1] = this->keys[i];
+    //         i--;
+    //     }
+
+    //     // Abre espaco para a nova chave
+    //     // for (int j = currKeys - 1; j >= i; j--)
+    //     //     this->keys[j + 1] = this->keys[j];
+
+    //     keys[i + 1] = key;
+    //     currKeys++;
+    //     return nullptr;
+    // }
+
+    // // Encontre a posicao onde inserir a chave
+    // while (i >= 0 && this->keys[i] > key)
+    // {
+    //     i--;
+    // }
+
+    // // Se o filho dessa posicao estiver cheio, divida-o
+    // if (this->children[i + 1]->currKeys == M - 1)
+    // {
+    //     split(i + 1, this->children[i + 1]);
+
+    //     // Já que o node filho foi divido em dois, precisa-se determinar em qual colocar a chave
+    //     // Se a chave que subiu do filho for menor que o valor a inserir, entao se insere no novo criado a direita
+    //     // Do contrario, insira no antigo mesmo
+    //     if (this->keys[i + 1] < key)
+    //         i++;
+    // }
+    // this->children[i + 1]->insert(key);
+
+    // Initialize index as index of rightmost element
+    int i = currKeys - 1;
+
+    // If this is a leaf node
+    if (isLeaf == true)
     {
-        newChild = insertLocal(key);
+        // The following loop does two things
+        // a) Finds the location of new key to be inserted
+        // b) Moves all greater keys to one place ahead
+        while (i >= 0 && keys[i] > key)
+        {
+            keys[i + 1] = keys[i];
+            i--;
+        }
 
-        return newChild;
+        // Insert the new key at found location
+        keys[i + 1] = key;
+        currKeys = currKeys + 1;
     }
-
-    // Se nao eh uma folha, ache o index e insira a chave no filho
-    int i = 0;
-    while (i < currKeys && key > keys[i])
-        i++;
-
-    // Se houver um overflow para baixo, uma referencia para um novo node sera retorarnada
-    newChild = children[i]->insert(key);
-
-    // Se ha um novo node para ser adcionado a lista
-    if (newChild != nullptr)
+    else // If this node is not leaf
     {
-        // Tambem ha no filho inserido uma chave para ser passada para cima
-        T newKey = children[i]->keys[(M - 1) / 2];
+        // Find the child which is going to have the new key
+        while (i >= 0 && keys[i] > key)
+            i--;
 
-        BTreeNode<T> *aux;
-
-        // Se este node tambem esta cheio
-        if (currKeys == M - 1)
+        // See if the found child is full
+        if (children[i + 1]->currKeys == M - 1)
         {
+            // If the child is full, then split it
+            split(i + 1, children[i + 1]);
 
-            BTreeNode<T> *newNode = insertLocal(newKey);
-
-            // Insere a nova chave no node partido
-            // Como houve a divisao e dois ponteiros ficam no primeiro node, diminui o index em 2
-            for (int j = i - 2; j <= newNode->currKeys; j++)
-            {
-                aux = newNode->children[j];
-                newNode->children[j] = newChild;
-                newChild = aux;
-            }
-
-            return newNode;
+            // After split, the middle key of children[i] goes up and
+            // children[i] is splitted into two. See which of the two
+            // is going to have the new key
+            if (keys[i + 1] < key)
+                i++;
         }
-        else // Se nao estiver cheio, apenas insira a chave e o novo filho
-        {
-            insertLocal(newKey);
-
-            // insere novo filho e move para direita
-            for (int j = i + 1; i < currKeys; i++)
-            {
-                aux = children[j];
-                children[j] = newChild;
-                newChild = aux;
-            }
-        }
+        children[i + 1]->insert(key);
     }
 
     return nullptr;
@@ -164,26 +210,27 @@ BTreeNode<T> *BTreeNode<T>::search(T key)
 template <class T>
 void BTreeNode<T>::show()
 {
-    for (int i = 0; i < currKeys; i++)
-        std::cout << keys[i] << " - ";
+    // for (int i = 0; i < currKeys; i++)
+    //     std::cout << keys[i] << " - ";
 
-    std::cout << std::endl;
+    // std::cout << std::endl;
 
-    // // There are n keys and n+1 children, traverse through n keys
-    // // and first n children
-    // int i;
-    // for (i = 0; i < currKeys; i++)
-    // {
-    //     // If this is not leaf, then before printing key[i],
-    //     // traverse the subtree rooted with child C[i].
-    //     if (isLeaf == false)
-    //         children[i]->show();
-    //     std::cout << " " << keys[i];
-    // }
+    // There are n keys and n+1 children, traverse through n keys
+    // and first n children
+    int i;
+    for (i = 0; i < currKeys; i++)
+    {
+        // If this is not leaf, then before printing key[i],
+        // traverse the subtree rooted with child C[i].
+        if (isLeaf == false)
+            children[i]->show();
+        std::cout << " " << keys[i];
+    }
 
-    // // Print the subtree rooted with last child
-    // if (isLeaf == false)
-    //     children[i]->show();
+    // Print the subtree rooted with last child
+    if (isLeaf == false)
+        children[i]->show();
 }
 
+// template class BTreeNode<BKey>;
 template class BTreeNode<int>;
