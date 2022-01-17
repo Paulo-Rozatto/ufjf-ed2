@@ -683,6 +683,8 @@ void arvoreVP()
         output.close();
         return;
     }
+    float mediaInsercao = 0;
+    float mediaBusca = 0;
     for(int i = 0; i < 3; i++)
     {
         cout << "M" << (i+1) << endl;
@@ -706,6 +708,7 @@ void arvoreVP()
         cout << "Árvore gerada em " << elapsed_seconds.count() << "s" << endl;
         cout << arv.getComparacaoInsercao() << " comparacaoInsercao " << endl;
         output << "Árvore gerada em " << elapsed_seconds.count() << "s" << endl;
+        mediaInsercao += elapsed_seconds.count();
         output << arv.getComparacaoInsercao() << " Comparações de Inserção" << endl;
 
         //busca
@@ -720,7 +723,7 @@ void arvoreVP()
         {
             j = rand() % ROWS;
             review[i]->init(bin, j);
-            aux = review[0]->getID();
+            aux = review[i]->getID();
             arv.busca(aux);
         }
         end = std::chrono::system_clock::now();
@@ -728,12 +731,16 @@ void arvoreVP()
         elapsed_seconds = end - start;
         cout << "Busca de 100 reviews feita em " << elapsed_seconds.count() << "s" << endl;
         output << "Busca de 100 reviews feita em " << elapsed_seconds.count() << "s" << endl;
+        mediaBusca += elapsed_seconds.count();
         output << arv.getComparacaoBusca() << " Comparações de busca" << endl;
         deleteArray(r, n);
         deleteArray(review,100);
     }
 
-
+    mediaBusca = mediaBusca / 3;
+    mediaInsercao = mediaInsercao / 3;
+    output << "Busca de 100 reviews feita em " << mediaBusca << "s" << endl;
+    output << "Busca de 100 reviews feita em " << mediaInsercao << "s" << endl;
 
     //arv.imprimePorNivel();
 }
