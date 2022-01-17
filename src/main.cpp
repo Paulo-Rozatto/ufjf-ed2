@@ -3,11 +3,13 @@
 #include <chrono>
 #include <time.h>
 #include <fstream>
+#include <string.h>
 
 #include "FileProcessing.hpp"
 #include "Sort.hpp"
 #include "BTree.hpp"
 // #include "BTreeNode.hpp"
+#include "ArvoreVP.h"
 
 using namespace std;
 
@@ -85,6 +87,38 @@ void arvB()
     cout << "Encontrado: " << (s == nullptr ? "N" : "Y") << endl;
 }
 
+void arvoreVP()
+{
+    ifstream input("input.dat");
+    ofstream output("saida_hash.txt");
+
+    if(!input.good())
+    {
+        cout << "Arquivo input.dat nao encontrado." << endl;
+        input.close();
+        return;
+    }
+
+    if(!output.good())
+    {
+        cout << "Arquivo saida_hash.txt nao pode ser criado" << endl;
+        output.close();
+        return;
+    }
+    int n = 1000000;
+    Register **r = createArray(n);
+    importacao(r, n);
+    
+    ArvoreVP arv;
+    for(int i = 0; i < n; i++)
+    {
+        string idReview = r[i]->getID();
+        arv.insere(idReview, i);
+    }
+    cout << arv.getComparacaoInsercao() << " comparacaoInsercao " << endl;
+    //arv.imprimePorNivel();
+}
+
 void teste()
 {
     int n = 100;
@@ -154,7 +188,7 @@ int main(int argc, char const *argv[])
         case '0':
             break;
         case '1':
-            // Vermelho e Preto
+            arvoreVP();
             break;
         case '2':
             // B();
