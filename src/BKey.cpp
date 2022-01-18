@@ -12,7 +12,7 @@ BKey::~BKey()
 void BKey::init(int index, char *id)
 {
     this->index = index;
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 90; i++)
     {
         this->id[i] = id[i];
     }

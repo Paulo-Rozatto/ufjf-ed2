@@ -9,13 +9,9 @@
 #include "Sort.hpp"
 #include "BTree.hpp"
 #include "BKey.hpp"
-// #include "BTreeNode.hpp"
 #include "ArvoreVP.h"
 
 using namespace std;
-
-// template class BTree<int, 5>;
-// template class BTreeNode<int, 5>;
 
 void importacao(Register **registers, int n)
 {
@@ -30,9 +26,11 @@ void importacao(Register **registers, int n)
     for (int i = 0; i < n; i++)
     {
         j = rand() % ROWS;
-        // j = i;
         registers[i]->initIdOnly(bin, j);
     }
+
+    cout << "Registros escolhidos!" << endl
+         << endl;
 }
 
 Register **createArray(int n)
@@ -46,56 +44,83 @@ Register **createArray(int n)
     return v;
 }
 
-void loadBKeys()
+void deleteArray(Register **v, int n)
 {
+    for (int i = 0; i < n; i++)
+        delete v[i];
+
+    delete[] v;
 }
 
-void arvB()
+void arvB(int size, int m)
 {
-    // BTree<BKey> t(3);
-    BTree<int> t(6);
-    int size = 1000000;
+    BTree<BKey> t(m);
+    double insertTime = 0, searchTime = 0;
+    int insertComp, totalComp = 0;
 
-    Register **r = createArray(size);
-    // importacao(r, size);
-    char nu[4] = {'n', 'a', 'd', '\0'};
-
-    BKey *search;
-
-    for (int i = 1; i <= size; i++)
+    for (int trials = 0; trials < 3; trials++)
     {
-        // sprintf(nu, "%d", i);
-        BKey key(i, nu);
-        t.insert(size - i);
+        cout << endl
+             << "Rodada " << (trials + 1) << "/3" << endl;
 
+        Register **r = createArray(size);
+        importacao(r, size);
+
+        insertComp = 0;
+
+        chrono::time_point<chrono::system_clock> start, end;
+        chrono::duration<double> elapsed_seconds;
+
+        cout << "Inserindo " << size << " chaves em uma arvore B..." << endl;
+        start = chrono::system_clock::now();
+        for (int i = 0; i < size; i++)
+        {
+            BKey key(r[i]->getIndex(), r[i]->getID());
+            t.insert(key);
+        }
+        end = chrono::system_clock::now();
+
+        elapsed_seconds = end - start;
+        cout << "Registros inseridos em " << elapsed_seconds.count() << "s " << endl
+             << endl;
+        insertTime += elapsed_seconds.count();
+
+        cout << "Gerar registros para busca" << endl;
+        Register **b = createArray(100);
+        importacao(b, 100);
+
+        BTreeNode<BKey> *search;
+
+        cout << "Buscando 100 registros..." << endl;
+        int encontrados = 0;
+
+        start = chrono::system_clock::now();
+        for (int i = 0; i < size; i++)
+        {
+            BKey key(r[i]->getIndex(), r[i]->getID());
+            search = t.root->search(key);
+
+            if (search != nullptr)
+                encontrados++;
+        }
+        end = chrono::system_clock::now();
+
+        elapsed_seconds = end - start;
+        cout << "100 registros buscados e " << encontrados << " encontrados em " << elapsed_seconds.count() << "s" << endl
+             << endl;
+        searchTime += elapsed_seconds.count();
+
+        cout << "Limpando memoria..." << endl;
+
+        deleteArray(r, size);
+        deleteArray(b, 100);
     }
 
-    cout << endl
-         << "Root: ";
-    t.root->show();
-    cout << endl;
-    BTreeNode<int> *b;
+    insertTime /= 3;
+    searchTime /= 3;
 
-    // for (int i = 0; i <= t.root->currKeys; i++)
-    // {
-    //     cout << "Child " << (i + 1) << ": ";
-    //     t.root->children[i]->show();
-
-    //     // for (int j = 0; j <= (t.root->children[i]->currKeys); j++)
-    //     // {
-    //     //     b = t.root->children[i]->children[j];
-    //     //     t.root->children[i]->children[j]->show();
-    //     // }
-    // }
-    // t.root->children[1]->children[0]->show();
-    // t.root->children[1]->children[1]->show();
-
-    // int key = 17;
-
-    // cout << "Key: " << search->getId() << endl;
-    BTreeNode<int> *s = t.root->search(388071);
-
-    cout << "Encontrado: " << (s == nullptr ? "N" : "Y") << endl;
+    cout << "Tempo medio de insercao: " << insertTime << "s" << endl;
+    cout << "Tempo medio de busca: " << searchTime << "s" << endl;
 }
 
 void arvoreVP()
@@ -166,14 +191,14 @@ int main(int argc, char const *argv[])
 
         if (csv.is_open())
         {
-            std::chrono::time_point<std::chrono::system_clock> start, end;
+            chrono::time_point<chrono::system_clock> start, end;
 
             cout << "Processando " << argv[1] << " para tiktok_app_reviews.bin..." << endl;
-            start = std::chrono::system_clock::now();
+            start = chrono::system_clock::now();
             csvToBin(csv);
-            end = std::chrono::system_clock::now();
+            end = chrono::system_clock::now();
 
-            std::chrono::duration<double> elapsed_seconds = end - start;
+            chrono::duration<double> elapsed_seconds = end - start;
             cout << "Arquivo processado em " << elapsed_seconds.count() << "s" << endl;
         }
         else
@@ -198,15 +223,21 @@ int main(int argc, char const *argv[])
         case '0':
             break;
         case '1':
+        {
             arvoreVP();
             break;
+        }
         case '2':
-            // B();
-            arvB();
+        {
+            int m;
+            int size = 100;
+
+            cout << "Qual o tamanho maximo dos nos?" << endl;
+            cin >> m;
+
+            arvB(size, m);
             break;
-        case '3':
-            teste();
-            break;
+        }
         default:
             cout << "Opcao invalida" << endl;
             break;

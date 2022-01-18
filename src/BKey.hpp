@@ -8,7 +8,7 @@ class BKey
 {
 private:
     int index;
-    char id[89];
+    char id[90];
 
 public:
     BKey(){};

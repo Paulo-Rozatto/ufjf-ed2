@@ -11,7 +11,7 @@ private:
 public:
     BTreeNode<T> *root;
     BTree(int M);
-    ~BTree(){};
+    ~BTree();
     void insert(T key);
 };
 

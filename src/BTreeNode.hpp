@@ -16,7 +16,7 @@ public:
     // friend class BTree;
 
     BTreeNode(int M, bool isLeaf);
-    ~BTreeNode(){};
+    ~BTreeNode();
     BTreeNode* insert(T key);
     BTreeNode* insertLocal(T key);
     BTreeNode *search(T key);

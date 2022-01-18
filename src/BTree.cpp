@@ -10,6 +10,12 @@ BTree<T>::BTree(int M)
 }
 
 template <class T>
+BTree<T>::~BTree()
+{
+    delete root;
+}
+
+template <class T>
 void BTree<T>::insert(T key)
 {
     if (root == nullptr)
@@ -41,6 +47,5 @@ void BTree<T>::insert(T key)
     }
 }
 
-// template class BTree<BKey>;
-template class BTree<int>;
-// template class BTree<int, 5>;
+template class BTree<BKey>;
+// template class BTree<int>;

@@ -14,6 +14,20 @@ BTreeNode<T>::BTreeNode(int M, bool isLeaf)
 }
 
 template <class T>
+BTreeNode<T>::~BTreeNode()
+{
+    if (!isLeaf)
+    {
+        for (int i = 0; i <= currKeys; i++)
+        {
+            delete children[i];
+        }
+    }
+    delete[] keys;
+    delete[] children;
+}
+
+template <class T>
 BTreeNode<T> *BTreeNode<T>::split(int i, BTreeNode *child)
 {
     // // A metade do tamanho maximo precisa ser usado varias vezes, entao salva numa variavel
@@ -232,5 +246,5 @@ void BTreeNode<T>::show()
         children[i]->show();
 }
 
-// template class BTreeNode<BKey>;
-template class BTreeNode<int>;
+template class BTreeNode<BKey>;
+// template class BTreeNode<int>;
