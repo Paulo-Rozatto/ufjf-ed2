@@ -32,8 +32,6 @@ void BTree<T>::insert(T key, int *cont)
 
         newRoot->split(0, root);
 
-        // newRoot->insert(key);
-
         root = newRoot;
 
         if (root->keys[0] < key)
@@ -54,4 +52,3 @@ void BTree<T>::insert(T key, int *cont)
 }
 
 template class BTree<BKey>;
-// template class BTree<int>;
