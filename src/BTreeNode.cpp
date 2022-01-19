@@ -219,7 +219,7 @@ BTreeNode<T> *BTreeNode<T>::search(T key, int *cont)
     while (i < currKeys && key > keys[i])
     {
         i++;
-        *cont++;
+        *cont += 1;
     }
     *cont += 1;
 
@@ -231,6 +231,7 @@ BTreeNode<T> *BTreeNode<T>::search(T key, int *cont)
         return nullptr;
 
     return children[i]->search(key, cont);
+    return nullptr;
 }
 
 template <class T>

@@ -46,8 +46,8 @@ Register **createArray(int n)
 
 void deleteArray(Register **v, int n)
 {
-    // for (int i = 0; i < n; i++)
-    //     delete v[i];
+    for (int i = 0; i < n; i++)
+        delete v[i];
 
     delete[] v;
 }
@@ -58,14 +58,22 @@ void arvB(int size, int m)
     double insertTime = 0, searchTime = 0;
     int insertComp, insertMeanComp = 0;
     int searchComp, searchMeanComp = 0;
+    ofstream outFile("saida.txt");
 
     Register **r = createArray(size);
     Register **b = createArray(100);
+
+    outFile << "Arvore B:" << endl
+            << "M: " << m << endl
+            << "Insercoes: " << size << endl
+            << "Buscas: 100" << endl;
 
     for (int trials = 0; trials < 3; trials++)
     {
         cout << endl
              << "Rodada " << (trials + 1) << "/3" << endl;
+        outFile << endl
+                << "Rodada " << (trials + 1) << "/3" << endl;
 
         importacao(r, size);
 
@@ -92,6 +100,10 @@ void arvB(int size, int m)
         insertTime += time;
         insertMeanComp += insertComp;
 
+        outFile << "Insercoes" << endl
+                << "  - Tempo: " << time << endl
+                << "  - Comparacoes: " << insertComp << endl;
+
         // -- Busca -- //
         std::chrono::time_point<std::chrono::system_clock> start2, end2;
 
@@ -109,7 +121,6 @@ void arvB(int size, int m)
         for (int i = 0; i < 100; i++)
         {
             key.init(b[i]->getIndex(), b[i]->getID());
-            // search = t.root->search(key, &searchComp);
             search = t.search(key, &searchComp);
 
             if (search != nullptr)
@@ -126,6 +137,11 @@ void arvB(int size, int m)
         searchTime += time;
         searchMeanComp += searchComp;
 
+        outFile << "Busca" << endl
+                << "  - Tempo: " << time << endl
+                << "  - Comparacoes: " << insertComp << endl
+                << endl;
+
         cout << "Limpando memoria..." << endl;
     }
 
@@ -139,8 +155,16 @@ void arvB(int size, int m)
     cout << "Comparacoes media de insercao: " << insertMeanComp << endl;
     cout << "Comparacoes media de busca: " << searchMeanComp << endl;
 
-    // deleteArray(r, size);
-    // deleteArray(b, 100);
+    outFile << "Resutaldos finais: " << endl
+            << "Insercao:" << endl
+            << "  - Media de tempo: " << insertTime << endl
+            << "  - Media de comparacoes: " << insertMeanComp << endl
+            << "Busca" << endl
+            << "  - Media de tempo: " << searchTime << endl
+            << "  - Media de comparacoes: " << searchMeanComp << endl;
+
+    deleteArray(r, size);
+    deleteArray(b, 100);
 }
 
 void arvoreVP()
