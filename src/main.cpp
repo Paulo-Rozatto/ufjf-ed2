@@ -167,6 +167,47 @@ void arvB(int size, int m)
     deleteArray(b, 100);
 }
 
+void testeArvB(int size, int m)
+{
+    int aux = 0;
+    BTree<BKey> t(m);
+
+    Register **r = createArray(size);
+
+    importacao(r, size);
+
+    cout << "ID do primeiro registro sorteado: " << endl
+         << "  - " << r[0]->getID() << endl
+         << endl;
+
+    cout << "Inserido registros na arvore" << endl;
+    for (int i = 0; i < size; i++)
+    {
+        BKey key(r[i]->getIndex(), r[i]->getID());
+        t.insert(key, &aux);
+    }
+    cout << "Registros inseridos" << endl;
+
+    char id[90];
+    cout << "Digite o id para busca: " << endl;
+    cin >> id;
+
+    BTreeNode<BKey> *search;
+    BKey key(0, id);
+
+    aux = 0;
+    search = t.search(key, &aux);
+
+    cout << endl;
+    if (search == nullptr)
+        cout << "Registro nao econtrado na arvore." << endl;
+    else
+        cout << "Registro foi encontrado!" << endl;
+    cout << endl;
+
+    deleteArray(r, size);
+}
+
 void arvoreVP()
 {
     // ifstream input("input.dat");
@@ -279,7 +320,30 @@ int main(int argc, char const *argv[])
             cout << "Qual o tamanho maximo dos nos?" << endl;
             cin >> m;
 
-            arvB(size, m);
+            while (true)
+            {
+                cout << "1 - Modo relatorio " << endl
+                     << "2 - Modo de teste" << endl
+                     << "Digite a opcao: ";
+
+                cin >> option;
+
+                if (option == '1')
+                {
+                    arvB(size, m);
+                    break;
+                }
+                else if (option == '2')
+                {
+                    testeArvB(size, m);
+                    break;
+                }
+                else
+                {
+                    cout << "Opcao invalida" << endl;
+                }
+            }
+
             break;
         }
         default:
