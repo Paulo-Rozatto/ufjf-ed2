@@ -16,7 +16,7 @@ BTree<T>::~BTree()
 }
 
 template <class T>
-void BTree<T>::insert(T key)
+void BTree<T>::insert(T key, int *cont)
 {
     if (root == nullptr)
     {
@@ -37,13 +37,19 @@ void BTree<T>::insert(T key)
         root = newRoot;
 
         if (root->keys[0] < key)
-            root->children[1]->insert(key);
+        {
+            root->children[1]->insert(key, cont);
+            *cont += 1;
+        }
         else
-            root->children[0]->insert(key);
+        {
+            root->children[0]->insert(key, cont);
+            *cont += 1;
+        }
     }
     else
     {
-        root->insert(key);
+        root->insert(key, cont);
     }
 }
 

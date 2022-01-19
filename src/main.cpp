@@ -46,8 +46,8 @@ Register **createArray(int n)
 
 void deleteArray(Register **v, int n)
 {
-    for (int i = 0; i < n; i++)
-        delete v[i];
+    // for (int i = 0; i < n; i++)
+    //     delete v[i];
 
     delete[] v;
 }
@@ -56,71 +56,91 @@ void arvB(int size, int m)
 {
     BTree<BKey> t(m);
     double insertTime = 0, searchTime = 0;
-    int insertComp, totalComp = 0;
+    int insertComp, insertMeanComp = 0;
+    int searchComp, searchMeanComp = 0;
+
+    Register **r = createArray(size);
+    Register **b = createArray(100);
 
     for (int trials = 0; trials < 3; trials++)
     {
         cout << endl
              << "Rodada " << (trials + 1) << "/3" << endl;
 
-        Register **r = createArray(size);
         importacao(r, size);
 
         insertComp = 0;
+        searchComp = 0;
 
-        chrono::time_point<chrono::system_clock> start, end;
-        chrono::duration<double> elapsed_seconds;
+        std::chrono::time_point<std::chrono::system_clock> start, end;
+        double time;
 
         cout << "Inserindo " << size << " chaves em uma arvore B..." << endl;
-        start = chrono::system_clock::now();
+        start = std::chrono::system_clock::now();
         for (int i = 0; i < size; i++)
         {
             BKey key(r[i]->getIndex(), r[i]->getID());
-            t.insert(key);
+            t.insert(key, &insertComp);
         }
-        end = chrono::system_clock::now();
+        end = std::chrono::system_clock::now();
 
-        elapsed_seconds = end - start;
-        cout << "Registros inseridos em " << elapsed_seconds.count() << "s " << endl
+        std::chrono::duration<double> elapsed_seconds = end - start;
+        time = elapsed_seconds.count();
+        cout << "Registros inseridos em " << time << "s " << endl
+             << insertComp << " comparacoes entre chaves feitas" << endl
              << endl;
-        insertTime += elapsed_seconds.count();
+        insertTime += time;
+        insertMeanComp += insertComp;
+
+        // -- Busca -- //
+        std::chrono::time_point<std::chrono::system_clock> start2, end2;
 
         cout << "Gerar registros para busca" << endl;
-        Register **b = createArray(100);
         importacao(b, 100);
 
         BTreeNode<BKey> *search;
 
         cout << "Buscando 100 registros..." << endl;
         int encontrados = 0;
+        time = 0;
 
-        start = chrono::system_clock::now();
-        for (int i = 0; i < size; i++)
+        BKey key;
+        start2 = std::chrono::system_clock::now();
+        for (int i = 0; i < 100; i++)
         {
-            BKey key(r[i]->getIndex(), r[i]->getID());
-            search = t.root->search(key);
+            key.init(b[i]->getIndex(), b[i]->getID());
+            // search = t.root->search(key, &searchComp);
+            search = t.search(key, &searchComp);
 
             if (search != nullptr)
                 encontrados++;
         }
-        end = chrono::system_clock::now();
+        end2 = std::chrono::system_clock::now();
 
-        elapsed_seconds = end - start;
-        cout << "100 registros buscados e " << encontrados << " encontrados em " << elapsed_seconds.count() << "s" << endl
+        std::chrono::duration<double> elapsed_seconds2 = end2 - start2;
+        time = elapsed_seconds2.count();
+
+        cout << "100 registros buscados e " << encontrados << " encontrados em " << time << "s" << endl
+             << searchComp << " comparacoes entre chaves feitas" << endl
              << endl;
-        searchTime += elapsed_seconds.count();
+        searchTime += time;
+        searchMeanComp += searchComp;
 
         cout << "Limpando memoria..." << endl;
-
-        deleteArray(r, size);
-        deleteArray(b, 100);
     }
 
     insertTime /= 3;
     searchTime /= 3;
+    insertMeanComp /= 3;
+    searchMeanComp /= 3;
 
     cout << "Tempo medio de insercao: " << insertTime << "s" << endl;
     cout << "Tempo medio de busca: " << searchTime << "s" << endl;
+    cout << "Comparacoes media de insercao: " << insertMeanComp << endl;
+    cout << "Comparacoes media de busca: " << searchMeanComp << endl;
+
+    // deleteArray(r, size);
+    // deleteArray(b, 100);
 }
 
 void arvoreVP()
@@ -191,14 +211,14 @@ int main(int argc, char const *argv[])
 
         if (csv.is_open())
         {
-            chrono::time_point<chrono::system_clock> start, end;
+            std::chrono::time_point<std::chrono::system_clock> start, end;
 
             cout << "Processando " << argv[1] << " para tiktok_app_reviews.bin..." << endl;
-            start = chrono::system_clock::now();
+            start = std::chrono::system_clock::now();
             csvToBin(csv);
-            end = chrono::system_clock::now();
+            end = std::chrono::system_clock::now();
 
-            chrono::duration<double> elapsed_seconds = end - start;
+            std::chrono::duration<double> elapsed_seconds = end - start;
             cout << "Arquivo processado em " << elapsed_seconds.count() << "s" << endl;
         }
         else
@@ -230,7 +250,7 @@ int main(int argc, char const *argv[])
         case '2':
         {
             int m;
-            int size = 100;
+            int size = 200;
 
             cout << "Qual o tamanho maximo dos nos?" << endl;
             cin >> m;

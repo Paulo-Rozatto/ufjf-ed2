@@ -17,14 +17,14 @@ public:
 
     BTreeNode(int M, bool isLeaf);
     ~BTreeNode();
-    BTreeNode* insert(T key);
-    BTreeNode* insertLocal(T key);
-    BTreeNode *search(T key);
+    BTreeNode *split(int i, BTreeNode *child);
+    BTreeNode *insert(T key, int *cont);
+    BTreeNode *search(T key, int *cont);
     void show();
-    BTreeNode* split(int i, BTreeNode *child);
+    // BTreeNode* insertLocal(T key);
 
-    private:
-    BTreeNode* split(T key);
+    // private:
+    // BTreeNode* split(T key);
 };
 
 #endif

@@ -119,7 +119,7 @@ BTreeNode<T> *BTreeNode<T>::split(int i, BTreeNode *child)
 }
 
 template <class T>
-BTreeNode<T> *BTreeNode<T>::insert(T key)
+BTreeNode<T> *BTreeNode<T>::insert(T key, int *cont)
 {
     // int i = currKeys - 1;
 
@@ -173,7 +173,9 @@ BTreeNode<T> *BTreeNode<T>::insert(T key)
         {
             keys[i + 1] = keys[i];
             i--;
+            *cont += 1;
         }
+        *cont += 1;
 
         // Insert the new key at found location
         keys[i + 1] = key;
@@ -183,7 +185,11 @@ BTreeNode<T> *BTreeNode<T>::insert(T key)
     {
         // Find the child which is going to have the new key
         while (i >= 0 && keys[i] > key)
+        {
             i--;
+            *cont += 1;
+        }
+        *cont += 1;
 
         // See if the found child is full
         if (children[i + 1]->currKeys == M - 1)
@@ -195,30 +201,36 @@ BTreeNode<T> *BTreeNode<T>::insert(T key)
             // children[i] is splitted into two. See which of the two
             // is going to have the new key
             if (keys[i + 1] < key)
+            {
+                *cont += 1;
                 i++;
+            }
         }
-        children[i + 1]->insert(key);
+        children[i + 1]->insert(key, cont);
     }
 
     return nullptr;
 }
 
 template <class T>
-BTreeNode<T> *BTreeNode<T>::search(T key)
+BTreeNode<T> *BTreeNode<T>::search(T key, int *cont)
 {
     int i = 0;
     while (i < currKeys && key > keys[i])
     {
         i++;
+        *cont++;
     }
+    *cont += 1;
 
+    *cont += 1;
     if (keys[i] == key)
         return this;
 
     if (isLeaf)
         return nullptr;
 
-    return children[i]->search(key);
+    return children[i]->search(key, cont);
 }
 
 template <class T>
