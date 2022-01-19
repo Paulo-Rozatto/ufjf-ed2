@@ -8,8 +8,8 @@ using namespace std;
 
 ArvoreVP::ArvoreVP()
 {
-    comparacaoInsercao = 0;
-    comparacaoBusca = 0;
+    numInsercao = 0;
+    numBusca = 0;
     sentinela = new NoVP("", -1);
     sentinela->setCor(PRETO);
     raiz = sentinela;
@@ -17,45 +17,43 @@ ArvoreVP::ArvoreVP()
 
 ArvoreVP::~ArvoreVP()
 {
-    raiz = libera(raiz);    
+    raiz = exclui(raiz);    
 }
 
-NoVP * ArvoreVP::libera(NoVP * p)
+NoVP * ArvoreVP::exclui(NoVP * p)
 {
     if(p != sentinela){
-        p->setEsq( libera(p->getEsq() ));
-        p->setDir( libera(p->getDir() ));        
+        p->setEsq( exclui(p->getEsq() ));
+        p->setDir( exclui(p->getDir() ));        
     }
     return sentinela;
 }
 
 bool ArvoreVP::busca(string chave)
 {
-    buscaAux(raiz, chave); 
-    cout << comparacaoBusca << "comparacaoBusca " << comparacaoInsercao << "comparacaoInsercao " << endl;
     return buscaAux(raiz, chave); 
 }
 
 bool ArvoreVP::buscaAux(NoVP * p, string chave)
 {
-    comparacaoBusca++;
+    numBusca++;
     if(p == sentinela)
     {
         return false;
     }
-    comparacaoBusca++;
+    numBusca++;
     if((p->getID().compare(chave)) == 0)
     {
         return true;
     }
-    //esq
-    comparacaoBusca++;
+    //esquerda
+    numBusca++;
     if((p->getID().compare(chave)) <= -1)
     {
         return buscaAux(p->getEsq(), chave);
     }
-    //dir
-    comparacaoBusca++;
+    //direita
+    numBusca++;
     if((p->getID().compare(chave)) >= +1 )
     {
         return buscaAux(p->getDir(), chave);
@@ -65,14 +63,13 @@ bool ArvoreVP::buscaAux(NoVP * p, string chave)
 
 void ArvoreVP::insere(string chave, int pos)
 {
-    balanceado = false;
-    raiz = insereAux(raiz, chave, pos);
-
+    if(!busca(chave))
+        raiz = insereAux(raiz, chave, pos);
 }
 
 NoVP * ArvoreVP::insereAux(NoVP * p, string chave, int pos)
 {
-    comparacaoInsercao++;
+    numInsercao++;
     if(p == sentinela){
         NoVP * noVp = new NoVP(chave, pos);
         noVp->setEsq(sentinela);
@@ -82,7 +79,7 @@ NoVP * ArvoreVP::insereAux(NoVP * p, string chave, int pos)
     }
     else
     {       
-        comparacaoInsercao++;
+        numInsercao++;
         if((p->getID().compare(chave)) <= -1)
         {
             p->setEsq(insereAux(p->getEsq(), chave, pos));
@@ -91,47 +88,12 @@ NoVP * ArvoreVP::insereAux(NoVP * p, string chave, int pos)
         {
             p->setDir(insereAux(p->getDir(), chave, pos));
         }
-        p = balancear(p);
+        p = balancearARV(p);
         return p;
     }
 }
 
-void ArvoreVP::imprime()
-{
-    imprimeAux(raiz);
-    cout << endl;
-}
-
-void ArvoreVP::imprimeAux(NoVP * p)
-{
-    if(p != sentinela)
-    {
-        imprimeAux(p->getEsq());
-        p->imprime();
-        imprimeAux(p->getDir());
-    }
-}
-
-void ArvoreVP::imprimePorNivel()
-{
-    imprimePorNivelAux(raiz, 0);
-}
-
-void ArvoreVP::imprimePorNivelAux(NoVP * p, int k)
-{
-    if(p != sentinela)
-    {
-        imprimePorNivelAux(p->getDir(), k+1);
-        for(int i = 0; i < k; i++)
-        {
-            cout << "\t";
-        }
-        p->imprime();
-        imprimePorNivelAux(p->getEsq(), k+1);
-    }
-}
-
-NoVP * ArvoreVP::balancear(NoVP * p){
+NoVP * ArvoreVP::balancearARV(NoVP * p){
     if(p->getCor() == VERMELHO)
     {
         NoVP *pai = p->getPai();

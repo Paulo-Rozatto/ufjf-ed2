@@ -667,8 +667,9 @@ void tabelaHash()
 
 void arvoreVP()
 {
+    
     ifstream input("input.dat");
-    ofstream output("saida_hash.txt");
+    ofstream output("saida_arvoreVP.txt");
 
     if(!input.good())
     {
@@ -683,66 +684,162 @@ void arvoreVP()
         output.close();
         return;
     }
-    float mediaInsercao = 0;
-    float mediaBusca = 0;
-    for(int i = 0; i < 3; i++)
+    int escolha;
+
+    do {
+        cout << "Menu ARVORE VERMELHO-PRETO" << endl;
+        cout << "Digite 1 para realizar a execução normal." << endl;
+        cout << "Digite 2 para realizar o módulo de teste." << endl;
+        cout <<  "Digite 0 para voltar." << endl;
+        cin >> escolha;
+    } while(escolha != 1 && escolha != 2 && escolha != 0);
+
+    switch(escolha)
     {
-        cout << "M" << (i+1) << endl;
-        output << "- M" << (i + 1) << " -" << endl;
-        int n = 1000000;
-        Register **r = createArray(n);
-        importacao(r, n);
-        std::chrono::time_point<std::chrono::system_clock> start, end, start2, end2;
-
-        
-        start = std::chrono::system_clock::now();
-        ArvoreVP arv;
-        for(int i = 0; i < n; i++)
+        case 1:
         {
-            string idReview = r[i]->getID();
-            arv.insere(idReview, i);
+            float mediaInsercao = 0;
+            float mediaBusca = 0;
+            int numDeBuscasEncontrados = 0;
+            for(int i = 0; i < 3; i++)
+            {
+                cout << "M" << (i+1) << endl;
+                output << "- M" << (i + 1) << " -" << endl;
+                int n = 1000000;
+                Register **r = createArray(n);
+                ArvoreVP arv;
+
+                std::chrono::time_point<std::chrono::system_clock> start, end, start2, end2;
+
+                
+                start = std::chrono::system_clock::now();
+                //seleção e inserção dos reviews na arvore
+                fstream bin;
+                bin.open("tiktok_app_reviews.bin", ios::in | ios::binary);
+
+                srand(time(NULL));
+
+                cout << "Escolhendo " << n << " registros aleatoriamente..." << endl;
+                int j;
+                string idReview;
+                for (int i = 0; i < n; i++)
+                {
+                    j = rand() % ROWS;
+                    r[i]->init(bin, j);
+                    idReview = r[i]->getID();
+                    arv.insere(idReview, j);
+                }
+
+                end = std::chrono::system_clock::now();
+
+                std::chrono::duration<double> elapsed_seconds = end - start;
+                cout << "Árvore gerada em " << elapsed_seconds.count() << "s" << endl;
+                cout << arv.getnumInsercao() << " Comparacoes de Insercao " << endl;
+                output << "Árvore gerada em " << elapsed_seconds.count() << "s" << endl;
+                mediaInsercao += elapsed_seconds.count();
+                output << arv.getnumInsercao() << " Comparações de Inserção" << endl;
+            
+                //busca
+                bin.open("tiktok_app_reviews.bin", ios::in | ios::binary);
+                string aux;
+                srand(time(NULL));
+                start = std::chrono::system_clock::now();
+                int k;
+                Register **review = createArray(100);
+                for(int i = 0; i < 100; i++)
+                {
+                    k = rand() % ROWS;
+                    review[i]->init(bin, k);
+                    aux = review[i]->getID();
+                    if(arv.busca(aux))
+                    {
+                        numDeBuscasEncontrados ++;
+                    }
+                }
+                cout << "Numero de IDs encontrados: " << numDeBuscasEncontrados << endl;
+                output << "Número de IDs encontrados: " << numDeBuscasEncontrados << endl;
+                end = std::chrono::system_clock::now();
+
+                elapsed_seconds = end - start;
+                cout << "Busca de 100 reviews feita em " << elapsed_seconds.count() << "s" << endl;
+                output << "Busca de 100 reviews feita em " << elapsed_seconds.count() << "s" << endl;
+                mediaBusca += elapsed_seconds.count();
+                output << arv.getnumBusca() << " Comparações de busca" << endl;
+                deleteArray(r, n);
+                deleteArray(review,100);
+            }
+
+            mediaBusca = mediaBusca / 3;
+            mediaInsercao = mediaInsercao / 3;
+            output << "Tempo médio de busca de 100 reviews: " << mediaBusca << "s" << endl;
+            output << "Tempo médio de inserção de 1000000 reviews: " << mediaInsercao << "s" << endl;
+            break;
         }
-        end = std::chrono::system_clock::now();
-
-        std::chrono::duration<double> elapsed_seconds = end - start;
-        cout << "Árvore gerada em " << elapsed_seconds.count() << "s" << endl;
-        cout << arv.getComparacaoInsercao() << " comparacaoInsercao " << endl;
-        output << "Árvore gerada em " << elapsed_seconds.count() << "s" << endl;
-        mediaInsercao += elapsed_seconds.count();
-        output << arv.getComparacaoInsercao() << " Comparações de Inserção" << endl;
-
-        //busca
-        fstream bin;
-        bin.open("tiktok_app_reviews.bin", ios::in | ios::binary);
-        string aux;
-        srand(time(NULL));
-        start = std::chrono::system_clock::now();
-        int j;
-        Register **review = createArray(100);
-        for(int i = 0; i < 100; i++)
+        case 2:
         {
-            j = rand() % ROWS;
-            review[i]->init(bin, j);
-            aux = review[i]->getID();
-            arv.busca(aux);
-        }
-        end = std::chrono::system_clock::now();
+                int n = 1000000;
+                int j, verificaEscolha;
+                Register **r = createArray(n);
+                ArvoreVP arv;
 
-        elapsed_seconds = end - start;
-        cout << "Busca de 100 reviews feita em " << elapsed_seconds.count() << "s" << endl;
-        output << "Busca de 100 reviews feita em " << elapsed_seconds.count() << "s" << endl;
-        mediaBusca += elapsed_seconds.count();
-        output << arv.getComparacaoBusca() << " Comparações de busca" << endl;
-        deleteArray(r, n);
-        deleteArray(review,100);
+                //seleção e inserção dos reviews na arvore
+                fstream bin;
+                bin.open("tiktok_app_reviews.bin", ios::in | ios::binary);
+
+                srand(time(NULL));
+
+                cout << "Deseja verificar se os ultimos 8 primeiros adicionados estao sendo encontrados pela funcao?" << endl;
+                cout << "1 - SIM" << endl << "Qualquer outro numero - NAO" << endl;
+                cin >> verificaEscolha;
+
+                cout << "Escolhendo " << n << " registros aleatoriamente..." << endl;
+
+                string idReview;
+
+                for (int i = 0; i < n; i++)
+                {
+                    j = rand() % ROWS;
+                    r[i]->init(bin, j);
+                    idReview = r[i]->getID();
+                    arv.insere(idReview, j);
+                    if(i > 1 && i < 10 && verificaEscolha == 1)
+                    {
+                        idReview = r[i-1]->getID();
+                        cout << "Inserindo review: " << idReview << endl;
+                        if(arv.busca(idReview))
+                    {
+                        cout << "Review encontrado: " << idReview <<endl;
+                    }
+                        else
+                        cout << "Nao achou" << endl;
+                    }
+
+                }
+            
+                //busca
+                string aux;
+                cout << "Informe o ID que deseja buscar" << endl;
+                cin >> aux;
+                srand(time(NULL));
+
+                    if(arv.busca(aux))
+                    {
+                        cout << "Review encontrado!!" << endl;
+                        cout << "Comparacoes de busca realizadas" << arv.getnumBusca() << endl;
+                    }
+                    else
+                    {
+                        cout << "Review nao encontrado!!" << endl;
+                        cout << "Comparacoes de busca realizadas: " << arv.getnumBusca() << endl;
+                    }
+                deleteArray(r, n);
+            break;
+        }
     }
 
-    mediaBusca = mediaBusca / 3;
-    mediaInsercao = mediaInsercao / 3;
-    output << "Busca de 100 reviews feita em " << mediaBusca << "s" << endl;
-    output << "Busca de 100 reviews feita em " << mediaInsercao << "s" << endl;
+    
 
-    //arv.imprimePorNivel();
+
 }
 
 void teste()
@@ -801,9 +898,9 @@ int main(int argc, char const *argv[])
     do
     {
         cout << "Menu: " << endl
-             << "1 - Ordenacao: " << endl
-             << "2 - Hash" << endl
-             << "3 - Modulo de teste:" << endl
+             << "1 - Arvore Vermelho-Preto: " << endl
+             << "2 - Arvore B(m = 20)" << endl
+             << "3 - Arvore B(m = 200)" << endl
              << "0 - Sair" << endl
              << "Digite a opcao: ";
 

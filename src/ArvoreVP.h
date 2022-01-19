@@ -39,24 +39,21 @@ class NoVP
         void setDir(NoVP * direito) { dir = direito; };
         void setPai(NoVP * p) { pai = p; };
         void setCor(bool color) { cor = color; };
-
-        void imprime(){cout << endl << "Registro n : " << this->posRegistro << " : " << ID;};
 };
 
 class ArvoreVP
 {
     private:
         
-        int comparacaoInsercao;
-        int comparacaoBusca;
+        int numInsercao;
+        int numBusca;
         NoVP * sentinela;
         NoVP * raiz;
-        bool balanceado;
 
     public:
         ArvoreVP();
         ~ArvoreVP();
-        NoVP * libera(NoVP * p);
+        NoVP * exclui(NoVP * p);
 
         bool busca(string chave);
         bool buscaAux(NoVP * p, string chave);
@@ -64,21 +61,14 @@ class ArvoreVP
         void insere(string chave, int pos);
         NoVP * insereAux(NoVP * p, string chave, int pos);
 
-        void imprime();
-        void imprimeAux(NoVP * p);
-
-        void imprimePorNivel();
-        void imprimePorNivelAux(NoVP * p, int k);
-
-        NoVP * balancear(NoVP * p);
+        NoVP * balancearARV(NoVP * p);
 
         void rotacaoSimplesEsq(NoVP * p);
         void rotacaoSimplesDir(NoVP * p);
 
-        int getComparacaoInsercao() {return this->comparacaoInsercao;};
-        
+        int getnumInsercao() {return this->numInsercao;};
 
-        int getComparacaoBusca() {return this->comparacaoBusca;};
+        int getnumBusca() {return this->numBusca;};
         
 };
 #endif // ARVOREVP_H
