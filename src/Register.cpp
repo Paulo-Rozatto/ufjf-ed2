@@ -20,23 +20,9 @@ Register::~Register()
         delete[] review;
 }
 
-void Register::initIdOnly(fstream &file, int i)
-{
-    index = i;
-    review = nullptr;
-
-    const int ROW_SIZE = 89 * sizeof(char) + sizeof(int) + sizeof(int) + 3 * sizeof(int) + 19 * sizeof(char);
-    i *= ROW_SIZE;
-
-    file.seekg(i, file.beg);
-
-    file.read(id, 89 * sizeof(char));
-}
 
 void Register::init(fstream &file, int i)
 {
-    this->index = i;
-
     // id (89 char) + review position (1 int) + upvote (1 int) + version (3 int) + date (19 char)
     const int ROW_SIZE = 89 * sizeof(char) + sizeof(int) + sizeof(int) + 3 * sizeof(int) + 19 * sizeof(char);
     int reviewPosition, size;
@@ -70,7 +56,7 @@ void Register::print()
     {
         cout << "id: " << id << endl
              << "upvote: " << upvote << endl;
-
+        
         // algumas linhas nao possuem versao, entao eh atribuido o valor 0.0.0 para manter o padrao no arquivo binario
         if (version[0] == 0 && version[1] == 0 && version[2] == 0)
             cout << "version: "
