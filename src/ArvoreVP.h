@@ -13,72 +13,59 @@ class NoVP
 {
     private:
         string ID;
-        int posRegistro;
+        int posReview;
         bool cor;
         NoVP *dir, *esq, *pai;
 
     public:
-        ///REVISAR
-        NoVP(string ID, int posRegistro){
+        NoVP(string ID, int posReview){
                 this->ID = ID;
-                this->posRegistro = posRegistro;
-
+                this->posReview = posReview;
         };
         ~NoVP();
 
-        int getPosicaoRegistro () {return this->posRegistro;};
-        string getID() {return ID;};
-        NoVP * getEsq() {return esq;};
-        NoVP * getDir() {return dir;};
-        NoVP * getPai() {return pai;};
-        bool getCor() {return cor;};
+        int getPosicaoRegistro () {return this->posReview;};
+        string getID() { return ID; };
+        NoVP * getEsq() { return esq; };
+        NoVP * getDir() { return dir; };
+        NoVP * getPai() { return pai; };
+        bool getCor() { return cor; };
 
-        void setPosRegistro(int posRegistro) {this->posRegistro = posRegistro;};
+        void setposReview(int posReview) { this->posReview = posReview; };
         void setID(string id) { ID = id; };
         void setEsq(NoVP * esquerdo) { esq = esquerdo; };
         void setDir(NoVP * direito) { dir = direito; };
         void setPai(NoVP * p) { pai = p; };
         void setCor(bool color) { cor = color; };
-
-        void imprime(){cout << endl << "Registro n : " << this->posRegistro << " : " << ID;};
 };
 
 class ArvoreVP
 {
     private:
         
-        int comparacaoInsercao;
-        int comparacaoBusca;
+        int numInsercao;
+        int numBusca;
         NoVP * sentinela;
         NoVP * raiz;
-        bool balanceado;
 
     public:
         ArvoreVP();
         ~ArvoreVP();
-        NoVP * libera(NoVP * p);
+        NoVP * remove(NoVP * p);
 
-        bool busca(string chave);
-        bool buscaAux(NoVP * p, string chave);
+        bool busca(string reviewID);
+        bool buscaAux(NoVP * p, string reviewID);
 
-        void insere(string chave, int pos);
-        NoVP * insereAux(NoVP * p, string chave, int pos);
+        void insere(string reviewID, int pos);
+        NoVP * insereAux(NoVP * p, string reviewID, int pos);
 
-        void imprime();
-        void imprimeAux(NoVP * p);
+        NoVP * balancearARV(NoVP * p);
 
-        void imprimePorNivel();
-        void imprimePorNivelAux(NoVP * p, int k);
+        void rotacionaEsquerda(NoVP * p);
+        void rotacionaDireita(NoVP * p);
 
-        NoVP * balancear(NoVP * p);
-
-        void rotacaoSimplesEsq(NoVP * p);
-        void rotacaoSimplesDir(NoVP * p);
-
-        int getComparacaoInsercao() {return this->comparacaoInsercao;};
-        
-
-        int getComparacaoBusca() {return this->comparacaoBusca;};
+        int getnumInsercao() {return this->numInsercao;};
+        int getnumBusca() {return this->numBusca;};
         
 };
-#endif // ARVOREVP_H
+#endif

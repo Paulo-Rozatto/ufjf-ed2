@@ -1,15 +1,12 @@
 #include "ArvoreVP.h"
 #include "iostream"
-#include "cstring" 
-
-#include <time.h>
 using namespace std;
 
 
 ArvoreVP::ArvoreVP()
 {
-    comparacaoInsercao = 0;
-    comparacaoBusca = 0;
+    numInsercao = 0;
+    numBusca = 0;
     sentinela = new NoVP("", -1);
     sentinela->setCor(PRETO);
     raiz = sentinela;
@@ -17,64 +14,63 @@ ArvoreVP::ArvoreVP()
 
 ArvoreVP::~ArvoreVP()
 {
-    raiz = libera(raiz);    
+    raiz = remove(raiz);    
 }
 
-NoVP * ArvoreVP::libera(NoVP * p)
+NoVP * ArvoreVP::remove(NoVP * p)
 {
     if(p != sentinela){
-        p->setEsq( libera(p->getEsq() ));
-        p->setDir( libera(p->getDir() ));        
+        p->setEsq( remove(p->getEsq() ));
+        p->setDir( remove(p->getDir() ));        
     }
     return sentinela;
 }
 
-bool ArvoreVP::busca(string chave)
+bool ArvoreVP::busca(string reviewID)
 {
-    buscaAux(raiz, chave); 
-    cout << comparacaoBusca << "comparacaoBusca " << comparacaoInsercao << "comparacaoInsercao " << endl;
-    return buscaAux(raiz, chave); 
+    return buscaAux(raiz, reviewID); 
 }
 
-bool ArvoreVP::buscaAux(NoVP * p, string chave)
+bool ArvoreVP::buscaAux(NoVP * p, string reviewID)
 {
-    comparacaoBusca++;
+    numBusca++;
+    string aux = p->getID();
+    int op = aux.compare(reviewID);
     if(p == sentinela)
     {
         return false;
     }
-    comparacaoBusca++;
-    if((p->getID().compare(chave)) == 0)
+    numBusca++;
+    if(op == 0)
     {
         return true;
     }
-    //esq
-    comparacaoBusca++;
-    if((p->getID().compare(chave)) <= -1)
+    //insere esquerda
+    numBusca++;
+    if(op < 0)
     {
-        return buscaAux(p->getEsq(), chave);
+        return buscaAux(p->getEsq(), reviewID);
     }
-    //dir
-    comparacaoBusca++;
-    if((p->getID().compare(chave)) >= +1 )
+    //insere direita
+    numBusca++;
+    if(op > 0)
     {
-        return buscaAux(p->getDir(), chave);
+        return buscaAux(p->getDir(), reviewID);
     }
     return false;
 }
 
-void ArvoreVP::insere(string chave, int pos)
+void ArvoreVP::insere(string reviewID, int pos)
 {
-    balanceado = false;
-    raiz = insereAux(raiz, chave, pos);
-
+    if(!busca(reviewID))
+        raiz = insereAux(raiz, reviewID, pos);
 }
 
-NoVP * ArvoreVP::insereAux(NoVP * p, string chave, int pos)
+NoVP * ArvoreVP::insereAux(NoVP * p, string reviewID, int pos)
 {
-    comparacaoInsercao++;
+    numInsercao++;
     if(p == sentinela){
-        NoVP * noVp = new NoVP(chave, pos);
+        NoVP * noVp = new NoVP(reviewID, pos);
         noVp->setEsq(sentinela);
         noVp->setDir(sentinela);
         noVp->setPai(sentinela);
@@ -82,56 +78,21 @@ NoVP * ArvoreVP::insereAux(NoVP * p, string chave, int pos)
     }
     else
     {       
-        comparacaoInsercao++;
-        if((p->getID().compare(chave)) <= -1)
+        numInsercao++;
+        if((p->getID().compare(reviewID)) <= -1)
         {
-            p->setEsq(insereAux(p->getEsq(), chave, pos));
+            p->setEsq(insereAux(p->getEsq(), reviewID, pos));
         }
         else
         {
-            p->setDir(insereAux(p->getDir(), chave, pos));
+            p->setDir(insereAux(p->getDir(), reviewID, pos));
         }
-        p = balancear(p);
+        p = balancearARV(p);
         return p;
     }
 }
 
-void ArvoreVP::imprime()
-{
-    imprimeAux(raiz);
-    cout << endl;
-}
-
-void ArvoreVP::imprimeAux(NoVP * p)
-{
-    if(p != sentinela)
-    {
-        imprimeAux(p->getEsq());
-        p->imprime();
-        imprimeAux(p->getDir());
-    }
-}
-
-void ArvoreVP::imprimePorNivel()
-{
-    imprimePorNivelAux(raiz, 0);
-}
-
-void ArvoreVP::imprimePorNivelAux(NoVP * p, int k)
-{
-    if(p != sentinela)
-    {
-        imprimePorNivelAux(p->getDir(), k+1);
-        for(int i = 0; i < k; i++)
-        {
-            cout << "\t";
-        }
-        p->imprime();
-        imprimePorNivelAux(p->getEsq(), k+1);
-    }
-}
-
-NoVP * ArvoreVP::balancear(NoVP * p){
+NoVP * ArvoreVP::balancearARV(NoVP * p) {
     if(p->getCor() == VERMELHO)
     {
         NoVP *pai = p->getPai();
@@ -139,7 +100,8 @@ NoVP * ArvoreVP::balancear(NoVP * p){
         {
             p->setCor(PRETO);
         }
-        else 
+        else
+        { 
             if(pai->getCor() == VERMELHO)
             {
                 NoVP * avo = pai->getPai();
@@ -162,34 +124,35 @@ NoVP * ArvoreVP::balancear(NoVP * p){
                         {
                             if(pai->getEsq() == p)
                             {
-                                rotacaoSimplesDir(p);
+                                rotacionaDireita(p);
                                 p->setCor(PRETO);
                             }
                             else
                                 pai->setCor(PRETO);
 
-                            rotacaoSimplesEsq(p);
+                            rotacionaEsquerda(p);
                             avo->setCor(VERMELHO);
                         }
                     else{
                         if(pai->getDir() == p)
                         {
-                            rotacaoSimplesEsq(p);
+                            rotacionaEsquerda(p);
                             p->setCor(PRETO);
                         }
                         else
                             pai->setCor(PRETO);
 
-                        rotacaoSimplesDir(p);
+                        rotacionaDireita(p);
                         avo->setCor(VERMELHO);
                     }
                 }
+            }
         }
     }
     return p;
 }
 
-void ArvoreVP::rotacaoSimplesEsq(NoVP * p)
+void ArvoreVP::rotacionaEsquerda(NoVP * p)
 {
     NoVP * pai = p->getPai();
     pai->setDir( p->getEsq() );
@@ -198,16 +161,20 @@ void ArvoreVP::rotacaoSimplesEsq(NoVP * p)
     if(avo != sentinela)
     {
         if(pai == avo->getEsq())
+        {
             avo->setEsq(p);
+        }
         else
+        {
             avo->setDir(p);
+        }
     }
     p->setPai(avo);
     pai->setPai(p);
 }
 
 
-void ArvoreVP::rotacaoSimplesDir(NoVP * p)
+void ArvoreVP::rotacionaDireita(NoVP * p)
 {
     NoVP * pai = p->getPai();
     pai->setEsq( p->getDir() );
@@ -216,10 +183,13 @@ void ArvoreVP::rotacaoSimplesDir(NoVP * p)
     if(avo != sentinela)
     {
         if(pai == avo->getEsq())
+        {
             avo->setEsq(p);
-
+        }
         else
+        {
             avo->setDir(p);
+        }
     }
     p->setPai(avo);
     pai->setPai(p);
