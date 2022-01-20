@@ -14,8 +14,8 @@ public:
 
     BTreeNode(int M, bool isLeaf);
     ~BTreeNode();
-    void *split(int i, BTreeNode *child);
-    void *insert(T key, int *cont);
+    void split(int i, BTreeNode *child);
+    void insert(T key, int *cont);
     BTreeNode *search(T key, int *cont);
 };
 

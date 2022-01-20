@@ -28,7 +28,7 @@ BTreeNode<T>::~BTreeNode()
 }
 
 template <class T>
-void *BTreeNode<T>::split(int i, BTreeNode *child)
+void BTreeNode<T>::split(int i, BTreeNode *child)
 {
     // A metade do valor maximo e utitlizada varias vezes abaixo
     // Entao ela foi guardada em uma variavel auxiliar
@@ -69,7 +69,7 @@ void *BTreeNode<T>::split(int i, BTreeNode *child)
 }
 
 template <class T>
-void *BTreeNode<T>::insert(T key, int *cont)
+void BTreeNode<T>::insert(T key, int *cont)
 {
    // i recebe o indice do valor mais a direita
     int i = currKeys - 1;
