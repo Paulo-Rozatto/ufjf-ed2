@@ -51,22 +51,21 @@ class ArvoreVP
     public:
         ArvoreVP();
         ~ArvoreVP();
-        NoVP * exclui(NoVP * p);
+        NoVP * remove(NoVP * p);
 
-        bool busca(string chave);
-        bool buscaAux(NoVP * p, string chave);
+        bool busca(string reviewID);
+        bool buscaAux(NoVP * p, string reviewID);
 
-        void insere(string chave, int pos);
-        NoVP * insereAux(NoVP * p, string chave, int pos);
+        void insere(string reviewID, int pos);
+        NoVP * insereAux(NoVP * p, string reviewID, int pos);
 
         NoVP * balancearARV(NoVP * p);
 
-        void rotacaoSimplesEsq(NoVP * p);
-        void rotacaoSimplesDir(NoVP * p);
+        void rotacionaEsquerda(NoVP * p);
+        void rotacionaDireita(NoVP * p);
 
         int getnumInsercao() {return this->numInsercao;};
-
         int getnumBusca() {return this->numBusca;};
         
 };
-#endif // ARVOREVP_H
+#endif
