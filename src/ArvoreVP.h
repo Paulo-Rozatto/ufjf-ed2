@@ -13,27 +13,25 @@ class NoVP
 {
     private:
         string ID;
-        int posRegistro;
+        int posReview;
         bool cor;
         NoVP *dir, *esq, *pai;
 
     public:
-        ///REVISAR
-        NoVP(string ID, int posRegistro){
+        NoVP(string ID, int posReview){
                 this->ID = ID;
-                this->posRegistro = posRegistro;
-
+                this->posReview = posReview;
         };
         ~NoVP();
 
-        int getPosicaoRegistro () {return this->posRegistro;};
-        string getID() {return ID;};
-        NoVP * getEsq() {return esq;};
-        NoVP * getDir() {return dir;};
-        NoVP * getPai() {return pai;};
-        bool getCor() {return cor;};
+        int getPosicaoRegistro () {return this->posReview;};
+        string getID() { return ID; };
+        NoVP * getEsq() { return esq; };
+        NoVP * getDir() { return dir; };
+        NoVP * getPai() { return pai; };
+        bool getCor() { return cor; };
 
-        void setPosRegistro(int posRegistro) {this->posRegistro = posRegistro;};
+        void setposReview(int posReview) { this->posReview = posReview; };
         void setID(string id) { ID = id; };
         void setEsq(NoVP * esquerdo) { esq = esquerdo; };
         void setDir(NoVP * direito) { dir = direito; };
