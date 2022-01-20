@@ -8,9 +8,9 @@ class BTree
 {
 private:
     int M;
+    BTreeNode<T> *root;
 
 public:
-    BTreeNode<T> *root;
     BTree(int M);
     ~BTree();
     void insert(T key, int *cont);

@@ -6,7 +6,7 @@ class BTreeNode
 {
 private:
 public:
-    int M; // max size
+    int M; // Tamanho maximo
     bool isLeaf;
     int currKeys; // current number of keys
     T *keys;
@@ -14,8 +14,8 @@ public:
 
     BTreeNode(int M, bool isLeaf);
     ~BTreeNode();
-    BTreeNode *split(int i, BTreeNode *child);
-    BTreeNode *insert(T key, int *cont);
+    void *split(int i, BTreeNode *child);
+    void *insert(T key, int *cont);
     BTreeNode *search(T key, int *cont);
 };
 

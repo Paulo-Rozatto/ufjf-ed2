@@ -315,7 +315,7 @@ int main(int argc, char const *argv[])
         case '2':
         {
             int m;
-            int size = 200;
+            int size = 1000000;
 
             cout << "Qual o tamanho maximo dos nos?" << endl;
             cin >> m;

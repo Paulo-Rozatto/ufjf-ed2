@@ -28,7 +28,7 @@ BTreeNode<T>::~BTreeNode()
 }
 
 template <class T>
-BTreeNode<T> *BTreeNode<T>::split(int i, BTreeNode *child)
+void *BTreeNode<T>::split(int i, BTreeNode *child)
 {
     // A metade do valor maximo e utitlizada varias vezes abaixo
     // Entao ela foi guardada em uma variavel auxiliar
@@ -42,7 +42,7 @@ BTreeNode<T> *BTreeNode<T>::split(int i, BTreeNode *child)
     for (int j = 0; j < md - 1; j++)
         newChild->keys[j] = child->keys[j + md];
 
-    // Se o filho atual for chave, tem-se que dividir os filhos tambem
+    // Se o filho atual nao for folha, tem-se que partilhar os filhos tambem
     if (child->isLeaf == false)
     {
         for (int j = 0; j < md; j++)
@@ -52,7 +52,7 @@ BTreeNode<T> *BTreeNode<T>::split(int i, BTreeNode *child)
     // O filho antigo tambem tera metade das chaves apos a divisao
     child->currKeys = md - 1;
 
-    /// Precisa-entao abrir espaco no node pai para guardar o novo filho
+    // Precisa-entao abrir espaco no node pai para guardar o novo filho
     // E entao inseri-lo
     for (int j = currKeys; j >= i + 1; j--)
         children[j + 1] = children[j];
@@ -66,22 +66,16 @@ BTreeNode<T> *BTreeNode<T>::split(int i, BTreeNode *child)
 
    // O numero de chaves no node pai apos a divisao aumenta
     currKeys = currKeys + 1;
-
-    return nullptr;
 }
 
 template <class T>
-BTreeNode<T> *BTreeNode<T>::insert(T key, int *cont)
+void *BTreeNode<T>::insert(T key, int *cont)
 {
    // i recebe o indice do valor mais a direita
     int i = currKeys - 1;
 
     if (isLeaf == true)
     {
-        // The following loop does two things
-        // a) Finds the location of new key to be inserted
-        // b) Moves all greater keys to one place ahead
-
         // Pode-se abrir espaco para insercao ao mesmo tempo que
         // Se procura onde colocar a nova chave
         while (i >= 0 && keys[i] > key)
@@ -104,18 +98,14 @@ BTreeNode<T> *BTreeNode<T>::insert(T key, int *cont)
         }
         *cont += 1;
 
-        // Se o filho para inservao estiver lotado, divida de uma vez
+        // Se o filho para insercaao estiver lotado, divida de uma vez
         if (children[i + 1]->currKeys == M - 1)
         {
             split(i + 1, children[i + 1]);
 
-            // After split, the middle key of children[i] goes up and
-            // children[i] is splitted into two. See which of the two
-            // is going to have the new key
-
-            // Se a chave na posicao i e menor que a chave de insercao
-            // Significa que tem que inserir essa chave no proximo node
-            // O que implica no novo node filho criado.
+            // Apos dividir, precisa-se decidir em qual dos 2 nodes vai ser inserida a chave
+            // Se a posicao i + 1 for menor que a chave, a chave que subiu do split acima ocupou o lugar da outra chave
+            // Entao se incremeta o i para obter a posicao correta
             if (keys[i + 1] < key)
             {
                 *cont += 1;
@@ -124,8 +114,6 @@ BTreeNode<T> *BTreeNode<T>::insert(T key, int *cont)
         }
         children[i + 1]->insert(key, cont);
     }
-
-    return nullptr;
 }
 
 template <class T>
@@ -147,6 +135,5 @@ BTreeNode<T> *BTreeNode<T>::search(T key, int *cont)
         return nullptr;
 
     return children[i]->search(key, cont);
-    return nullptr;
 }
 template class BTreeNode<BKey>;
