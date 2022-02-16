@@ -43,7 +43,7 @@ void Register::init(fstream &file, int i)
 
     i *= ROW_SIZE;
 
-    file.seekg(i - file.cur, file.cur);
+    file.seekg(i, file.beg);
 
     file.read(id, 89 * sizeof(char));
     file.read(reinterpret_cast<char *>(&reviewPosition), sizeof(reviewPosition));
