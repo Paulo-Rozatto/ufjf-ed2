@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string.h>
 #include <algorithm>
+#include <unordered_map>
 
 #include "FileProcessing.hpp"
 #include "MinHeap.hpp"
@@ -53,19 +54,38 @@ void deleteArray(Register **v, int n)
     delete[] v;
 }
 
+void fillTable(HuffNode *node, string code, unordered_map<char, string> *encodingTable)
+{
+    if (node == nullptr)
+        return;
+
+    if (node->getLeft() == nullptr && node->getRight() == nullptr)
+    {
+        (*encodingTable)[node->getKey()] = code;
+    }
+    else
+    {
+        fillTable(node->getRight(), code + '0', encodingTable);
+        fillTable(node->getLeft(), code + '1', encodingTable);
+    }
+}
+
 void test()
 {
     MinHeap heap(128);
 
-    char arr[] = {'a', 'b', 'c', 'd', 'e', 'f'};
-    int freq[] = {5, 9, 12, 13, 16, 45};
+    // A   C   E   D   T   O   B    F  G
+    // 220 78  112 50  12  66  180  95 34
 
-    for (int i = 0; i < 6; i++)
+    char arr[] = {'A', 'C', 'E', 'D', 'T', 'O', 'B', 'F', 'G'};
+    int freq[] = {220, 78, 112, 50, 12, 66, 180, 95, 34};
+
+    for (int i = 0; i < 9; i++)
     {
-        for (int j = 0; j < freq[i]; j++)
-        {
-            heap.insertOrIncrease(arr[i]);
-        }
+        HuffNode *node = new HuffNode(arr[i]);
+        node->setCount(freq[i]);
+
+        heap.insert(node);
     }
 
     HuffNode *parent, *left, *right;
@@ -76,17 +96,22 @@ void test()
         right = heap.popMin();
         left = heap.popMin();
 
-        parent->setCount(
-            right->getCount() + left->getCount()
-        );
+        parent->setCount(right->getCount() + left->getCount());
         parent->setRight(right);
         parent->setLeft(left);
-
+        
         heap.insert(parent);
     }
-    
 
-    heap.show();
+    HuffNode *encodingTree = heap.getRoot();
+    unordered_map<char, string> encodingTable;
+
+    fillTable(encodingTree, "", &encodingTable);
+
+    for (auto pair : encodingTable)
+    {
+        cout << pair.first << ": " << pair.second << endl;
+    }
 }
 
 int main(int argc, char const *argv[])
