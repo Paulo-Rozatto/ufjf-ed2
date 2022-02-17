@@ -56,19 +56,36 @@ void deleteArray(Register **v, int n)
 
 void test()
 {
-    MinHeap heap(5);
+    MinHeap heap(128);
 
-    for (int i = 5; i >= 1; i--)
+    char arr[] = {'a', 'b', 'c', 'd', 'e', 'f'};
+    int freq[] = {5, 9, 12, 13, 16, 45};
+
+    for (int i = 0; i < 6; i++)
     {
-        for (int j = 0; j < i; j++){
-            heap.insertOrIncrease('0' + i);
+        for (int j = 0; j < freq[i]; j++)
+        {
+            heap.insertOrIncrease(arr[i]);
         }
     }
-    heap.show();
-    cout << endl;
 
-    // heap.insertOrIncrease('5');
-    heap.popMin();
+    HuffNode *parent, *left, *right;
+
+    while (heap.getSize() > 1)
+    {
+        parent = new HuffNode();
+        right = heap.popMin();
+        left = heap.popMin();
+
+        parent->setCount(
+            right->getCount() + left->getCount()
+        );
+        parent->setRight(right);
+        parent->setLeft(left);
+
+        heap.insert(parent);
+    }
+    
 
     heap.show();
 }

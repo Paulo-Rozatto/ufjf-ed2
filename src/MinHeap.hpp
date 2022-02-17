@@ -10,7 +10,6 @@ using namespace std;
 class MinHeap
 {
 private:
-    int size;
     vector<HuffNode *> heap;
 
     int find(char key);
@@ -25,10 +24,12 @@ public:
     int left(int i) { return 2 * i + 1; }
     int right(int i) { return 2 * i + 2; }
 
+    void insert(HuffNode *node);
     void insertOrIncrease(char key);
     HuffNode *popMin();
 
-    int getSize() { return size; }
+    HuffNode *getRoot() { return heap[0]; }
+    int getSize() { return heap.size(); }
     void show();
 };
 
@@ -86,20 +87,25 @@ void MinHeap::heapify(int idx)
     }
 }
 
+void MinHeap::insert(HuffNode *node)
+{
+    heap.push_back(node);
+    int i = heap.size() - 1;
+
+    while (i > 0 && heap[parent(i)]->getCount() > heap[i]->getCount())
+    {
+        swapNodes(parent(i), i);
+        i = parent(i);
+    }
+}
+
 void MinHeap::insertOrIncrease(char key)
 {
     int idx = find(key);
 
     if (idx == -1)
     {
-        heap.push_back(new HuffNode(key));
-        int i = heap.size() - 1;
-
-        while (i > 0 && heap[parent(i)]->getCount() > heap[i]->getCount())
-        {
-            swapNodes(parent(i), i);
-            i = parent(i);
-        }
+        insert(new HuffNode(key));
     }
     else
     {
