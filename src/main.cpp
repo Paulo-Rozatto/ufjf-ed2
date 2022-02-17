@@ -54,6 +54,22 @@ void deleteArray(Register **v, int n)
     delete[] v;
 }
 
+void fillFrequency(unordered_map<char, int> *frequencyMap, char *str, int n)
+{
+    unordered_map<char, int>::iterator it;
+
+    for (int i = 0; i < n; i++)
+    {
+        it = frequencyMap->find(str[i]);
+
+        if (it != frequencyMap->end())
+            it->second++;
+
+        else
+            frequencyMap->insert(std::make_pair(str[i], 1));
+    }
+}
+
 void fillTable(HuffNode *node, string code, unordered_map<char, string> *encodingTable)
 {
     if (node == nullptr)
@@ -70,26 +86,22 @@ void fillTable(HuffNode *node, string code, unordered_map<char, string> *encodin
     }
 }
 
-void test()
+void encondigStructures(HuffNode *encodingTree, unordered_map<char, string> *encodingTable, unordered_map<char, int> *frequencyMap)
 {
-    MinHeap heap(128);
+    MinHeap heap;
 
-    // A   C   E   D   T   O   B    F  G
-    // 220 78  112 50  12  66  180  95 34
-
-    char arr[] = {'A', 'C', 'E', 'D', 'T', 'O', 'B', 'F', 'G'};
-    int freq[] = {220, 78, 112, 50, 12, 66, 180, 95, 34};
-
-    for (int i = 0; i < 9; i++)
+    // Insere caracteres e suas respectivas frequencias na heap
+    for (pair<char, int> p : (*frequencyMap))
     {
-        HuffNode *node = new HuffNode(arr[i]);
-        node->setCount(freq[i]);
+        HuffNode *node = new HuffNode(p.first);
+        node->setCount(p.second);
 
         heap.insert(node);
     }
 
     HuffNode *parent, *left, *right;
 
+    // Monta a arvore de codificacao
     while (heap.getSize() > 1)
     {
         parent = new HuffNode();
@@ -99,18 +111,64 @@ void test()
         parent->setCount(right->getCount() + left->getCount());
         parent->setRight(right);
         parent->setLeft(left);
-        
+
         heap.insert(parent);
     }
 
-    HuffNode *encodingTree = heap.getRoot();
-    unordered_map<char, string> encodingTable;
+    encodingTree = heap.getRoot();
 
-    fillTable(encodingTree, "", &encodingTable);
+    // Usa a arvore para criar uma hash table com os codigos binarios para codificacao
+    fillTable(encodingTree, "", encodingTable);
 
-    for (auto pair : encodingTable)
+    // Descomentar para mostrar tabela de codificacao
+    // for (pair<char, string> p : (*encodingTable))
+    // {
+    //     cout << p.first << ": " << p.second << endl;
+    // }
+}
+
+void compressao()
+{
+    // const int SIZES[] = {10000, 100000, 1000000};
+    const int SIZES[] = {10, 20, 30};
+    int n;
+    Register **registers;
+
+    // Teste com valores do slide
+    // A   C   E   D   T   O   B    F  G
+    // 220 78  112 50  12  66  180  95 34
+    // char arr[] = {'A', 'C', 'E', 'D', 'T', 'O', 'B', 'F', 'G'};
+    // int freq[] = {220, 78, 112, 50, 12, 66, 180, 95, 34};
+
+    for (int i = 0; i < 3; i++)
     {
-        cout << pair.first << ": " << pair.second << endl;
+        n = SIZES[i];
+
+        registers = createArray(n);
+        importacao(registers, n);
+
+        unordered_map<char, int> frequencyMap;
+
+        for (int j = 0; j < n; j++)
+        {
+            fillFrequency(&frequencyMap, registers[i]->getReview(), registers[i]->getReviewSize());
+        }
+
+        // Teste com valores do slide
+        // for (int j = 0; j < 9; j++) {
+        //     frequencyMap.insert(make_pair(arr[j], freq[j]));
+        // }
+        // for(auto p: frequencyMap) {
+        //     cout << p.first << " - " << p.second << endl;
+        // }
+        // cout << endl;
+
+        HuffNode encodingTree;
+        unordered_map<char, string> encodingTable;
+
+        encondigStructures(&encodingTree, &encodingTable, &frequencyMap);
+
+        deleteArray(registers, n);
     }
 }
 
@@ -152,8 +210,6 @@ int main(int argc, char const *argv[])
         }
     }
 
-    test();
-
     do
     {
         cout << "Menu: " << endl
@@ -171,7 +227,7 @@ int main(int argc, char const *argv[])
             break;
         case '1':
         {
-            // compressao
+            compressao();
             break;
         }
         case '2':

@@ -39,11 +39,11 @@ void Register::init(fstream &file, int i)
 
     // id (89 char) + review position (1 int) + upvote (1 int) + version (3 int) + date (19 char)
     const int ROW_SIZE = 89 * sizeof(char) + sizeof(int) + sizeof(int) + 3 * sizeof(int) + 19 * sizeof(char);
-    int reviewPosition, size;
+    int reviewPosition;
 
     i *= ROW_SIZE;
 
-    file.seekg(i - file.cur, file.cur);
+    file.seekg(i, ios::beg);
 
     file.read(id, 89 * sizeof(char));
     file.read(reinterpret_cast<char *>(&reviewPosition), sizeof(reviewPosition));
@@ -52,16 +52,16 @@ void Register::init(fstream &file, int i)
     file.read(date, 19 * sizeof(char));
 
     file.seekg(reviewPosition, file.beg);
-    file.read(reinterpret_cast<char *>(&size), sizeof(size));
+    file.read(reinterpret_cast<char *>(&reviewSize), sizeof(reviewSize));
 
     if (review != nullptr)
         delete[] review;
 
-    review = new char[size + 1];
+    review = new char[reviewSize + 1];
 
-    file.read(review, size * sizeof(char));
+    file.read(review, reviewSize * sizeof(char));
 
-    id[89] = date[19] = review[size] = '\0';
+    id[89] = date[19] = review[reviewSize] = '\0';
 }
 
 void Register::print()

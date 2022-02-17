@@ -11,6 +11,7 @@ private:
     int version[3];
     char date[20];
     char *review;
+    int reviewSize;
     int index;
 
 public:
@@ -26,7 +27,9 @@ public:
     int getUpvote() { return upvote; };
     int *getVersion() { return version; };
     char *getID() { return id; };
-    int getIndex() { return index; }
-    void setUpvote(int value) { this->upvote = value; }
+    int getIndex() { return index; };
+    char *getReview() { return review; };
+    int getReviewSize() { return reviewSize; };
+    void setUpvote(int value) { this->upvote = value; };
 };
 #endif

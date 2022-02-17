@@ -3,7 +3,7 @@
 #include <fstream>
 #include <queue>
 #include <math.h>
-#include "Register.hpp"
+#include "./Register.hpp"
 
 using namespace std;
 

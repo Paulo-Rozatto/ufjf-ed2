@@ -17,7 +17,7 @@ private:
     void swapNodes(int n1, int n2);
 
 public:
-    MinHeap(int n);
+    MinHeap();
     ~MinHeap();
 
     int parent(int i) { return (i - 1) / 2; }
@@ -25,7 +25,6 @@ public:
     int right(int i) { return 2 * i + 2; }
 
     void insert(HuffNode *node);
-    void insertOrIncrease(char key);
     HuffNode *popMin();
 
     HuffNode *getRoot() { return heap[0]; }
@@ -40,9 +39,8 @@ void MinHeap::swapNodes(int n1, int n2)
     heap[n2] = aux;
 }
 
-MinHeap::MinHeap(int n)
+MinHeap::MinHeap()
 {
-    heap.reserve(n);
 }
 
 MinHeap::~MinHeap()
@@ -96,21 +94,6 @@ void MinHeap::insert(HuffNode *node)
     {
         swapNodes(parent(i), i);
         i = parent(i);
-    }
-}
-
-void MinHeap::insertOrIncrease(char key)
-{
-    int idx = find(key);
-
-    if (idx == -1)
-    {
-        insert(new HuffNode(key));
-    }
-    else
-    {
-        heap[idx]->increaseCount();
-        heapify(idx);
     }
 }
 
