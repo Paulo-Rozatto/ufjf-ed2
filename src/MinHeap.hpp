@@ -54,34 +54,16 @@ MinHeap::~MinHeap()
 
 int MinHeap::find(char key)
 {
-    if (heap.size() == 0)
-    {
-        return -1;
-    }
-
-    int idx = -1, i = 0;
-    HuffNode *node = heap[0];
-
-    do
+    int i;
+    for (i = 0; i < heap.size(); i++)
     {
         if (heap[i]->getKey() == key)
         {
-            idx = i;
-            break;
+            return i;
         }
+    }
 
-        if (key < heap[i]->getKey())
-        {
-            i = left(i);
-        }
-        else
-        {
-            i = right(i);
-        }
-
-    } while (i < heap.size());
-
-    return idx;
+    return -1;
 }
 
 void MinHeap::heapify(int idx)
