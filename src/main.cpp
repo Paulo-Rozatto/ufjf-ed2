@@ -8,6 +8,7 @@
 
 #include "FileProcessing.hpp"
 #include "Sort.hpp"
+#include "MinHeap.hpp"
 
 using namespace std;
 
@@ -53,6 +54,25 @@ void deleteArray(Register **v, int n)
     delete[] v;
 }
 
+void test()
+{
+    MinHeap heap(5);
+
+    for (int i = 5; i >= 1; i--)
+    {
+        for (int j = 0; j < i; j++){
+            heap.insertOrIncrease('0' + i);
+        }
+    }
+    heap.show();
+    cout << endl;
+
+    // heap.insertOrIncrease('5');
+    heap.popMin();
+
+    heap.show();
+}
+
 int main(int argc, char const *argv[])
 {
     char option;
@@ -90,6 +110,8 @@ int main(int argc, char const *argv[])
             return 1;
         }
     }
+
+    test();
 
     do
     {
