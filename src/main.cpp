@@ -7,7 +7,6 @@
 #include <algorithm>
 
 #include "FileProcessing.hpp"
-#include "Sort.hpp"
 #include "MinHeap.hpp"
 
 using namespace std;
