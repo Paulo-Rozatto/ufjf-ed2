@@ -302,7 +302,7 @@ void compressao()
         comprimeEscreveBin(aux);
         descomprimeEscreveBin(encodingTree);
 
-        // delete encodingTree;
+        delete encodingTree;
     }
 }
 
