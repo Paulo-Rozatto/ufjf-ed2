@@ -45,10 +45,10 @@ MinHeap::MinHeap()
 
 MinHeap::~MinHeap()
 {
-    for (HuffNode *p : heap)
-        delete p;
+    // for (HuffNode *p : heap)
+    //     delete p;
 
-    heap.clear();
+    // heap.clear();
 }
 
 int MinHeap::find(char key)

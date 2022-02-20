@@ -86,7 +86,7 @@ void fillTable(HuffNode *node, string code, unordered_map<char, string> *encodin
     }
 }
 
-void encondigStructures(HuffNode *encodingTree, unordered_map<char, string> *encodingTable, unordered_map<char, int> *frequencyMap)
+void encondigStructures(HuffNode **encodingTree, unordered_map<char, string> *encodingTable, unordered_map<char, int> *frequencyMap)
 {
     MinHeap heap;
 
@@ -115,10 +115,10 @@ void encondigStructures(HuffNode *encodingTree, unordered_map<char, string> *enc
         heap.insert(parent);
     }
 
-    encodingTree = heap.getRoot();
+    *encodingTree = heap.getRoot();
 
     // Usa a arvore para criar uma hash table com os codigos binarios para codificacao
-    fillTable(encodingTree, "", encodingTable);
+    fillTable(*encodingTree, "", encodingTable);
 
     // Descomentar para mostrar tabela de codificacao
     // for (pair<char, string> p : (*encodingTable))
@@ -130,7 +130,7 @@ void encondigStructures(HuffNode *encodingTree, unordered_map<char, string> *enc
 string copiaRegistrosParaString(Register **registers, int tam)
 {
     string texto;
-    for(int i = 0; i < tam; i++)
+    for (int i = 0; i < tam; i++)
     {
         int *version = registers[i]->getVersion();
         texto += registers[i]->getID();
@@ -146,7 +146,8 @@ string copiaRegistrosParaString(Register **registers, int tam)
 /*
      Função para testar o bit i
 */
-unsigned int eh_bit_um(unsigned char byte, int i){
+unsigned int eh_bit_um(unsigned char byte, int i)
+{
     unsigned char mascara = (1 << i);
     return byte & mascara;
 }
@@ -161,19 +162,22 @@ void descomprimeEscreveBin(HuffNode *raiz)
     unsigned char byte;
     int i;
     cout << "Entrou na funcao e copiou a raiz" << endl;
-    if(arq){
+    if (arq)
+    {
         cout << "Entruo no if arq" << endl;
         // enquanto conseguir ler do arquivo
-        while(fread(&byte, sizeof(unsigned char), 1, arq)){
-            for(i = 7; i >= 0; i--){
+        while (fread(&byte, sizeof(unsigned char), 1, arq))
+        {
+            for (i = 7; i >= 0; i--)
+            {
                 cout << i << endl;
-                if((eh_bit_um(byte, i)))
+                if ((eh_bit_um(byte, i)))
                 {
                     cout << aux->getCount() << "if" << endl;
                     aux = aux->getRight();
                     cout << aux->getCount() << "alou" << endl;
                 }
-                    
+
                 else
                 {
                     cout << aux->getCount() << "else" << endl;
@@ -182,7 +186,8 @@ void descomprimeEscreveBin(HuffNode *raiz)
                 }
                 cout << aux->getCount() << endl;
                 cout << "Entrou no for e passou pelo if" << endl;
-                if(aux->getLeft() == NULL && aux->getRight() == NULL){
+                if (aux->getLeft() == NULL && aux->getRight() == NULL)
+                {
                     cout << aux->getCount() << endl;
                     cout << "Entrou no ultimo if" << endl;
                     cout << "foi" << endl;
@@ -200,29 +205,29 @@ void descomprimeEscreveBin(HuffNode *raiz)
 void comprimeEscreveBin(string texto)
 {
     FILE *arq = fopen("reviewsComp.bin", "wb");
-    
-    if(arq)
+
+    if (arq)
     {
         int j = 7;
         unsigned char mascara, byte = 0;
-        for(int i = 0; i < texto.length(); i++)
+        for (int i = 0; i < texto.length(); i++)
         {
             mascara = 1;
-            if(texto[i] != '\0')
+            if (texto[i] != '\0')
             {
                 mascara = mascara << j;
                 byte = byte | mascara;
             }
             j--;
 
-            if(j < 0)
+            if (j < 0)
             {
                 fwrite(&byte, sizeof(unsigned char), 1, arq);
                 byte = 0;
                 j = 7;
             }
         }
-        if(j != 7) // tem um byte em formação
+        if (j != 7) // tem um byte em formação
         {
             fwrite(&byte, sizeof(unsigned char), 1, arq);
         }
@@ -276,20 +281,20 @@ void compressao()
         HuffNode *encodingTree;
         unordered_map<char, string> encodingTable;
 
-        encondigStructures(encodingTree, &encodingTable, &frequencyMap);
-        //Copia as informações dos registros para uma string e desaloca 
+        encondigStructures(&encodingTree, &encodingTable, &frequencyMap);
+        // Copia as informações dos registros para uma string e desaloca
         string texto = copiaRegistrosParaString(registers, n);
         deleteArray(registers, n);
 
-            FILE *arquivo = fopen("reviewsDescomp.bin", "wb");
+        FILE *arquivo = fopen("reviewsDescomp.bin", "wb");
 
-            for(int i = 0; i < texto.length(); i++)
-            {
-                fwrite(&texto[i],sizeof(unsigned char), 1, arquivo);
-            }
-            fclose(arquivo);
+        for (int i = 0; i < texto.length(); i++)
+        {
+            fwrite(&texto[i], sizeof(unsigned char), 1, arquivo);
+        }
+        fclose(arquivo);
         string aux;
-        for(int i = 0; i < texto.length(); i++)
+        for (int i = 0; i < texto.length(); i++)
         {
             aux += encodingTable[texto[i]];
         }
@@ -297,7 +302,7 @@ void compressao()
         comprimeEscreveBin(aux);
         descomprimeEscreveBin(encodingTree);
 
-        
+        // delete encodingTree;
     }
 }
 
