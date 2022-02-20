@@ -54,11 +54,11 @@ void deleteArray(Register **v, int n)
     delete[] v;
 }
 
-void fillFrequency(unordered_map<char, int> *frequencyMap, char *str, int n)
+void fillFrequency(unordered_map<char, int> *frequencyMap, string str)
 {
     unordered_map<char, int>::iterator it;
 
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < str.length(); i++)
     {
         it = frequencyMap->find(str[i]);
 
@@ -121,10 +121,10 @@ void encondigStructures(HuffNode **encodingTree, unordered_map<char, string> *en
     fillTable(*encodingTree, "", encodingTable);
 
     // Descomentar para mostrar tabela de codificacao
-    // for (pair<char, string> p : (*encodingTable))
-    // {
-    //     cout << p.first << ": " << p.second << endl;
-    // }
+    for (pair<char, string> p : (*encodingTable))
+    {
+        cout << p.first << ": " << p.second << endl;
+    }
 }
 
 string copiaRegistrosParaString(Register **registers, int tam)
@@ -138,18 +138,21 @@ string copiaRegistrosParaString(Register **registers, int tam)
     return texto;
 }
 
-string decodificar(string texto, HuffNode *raiz){
+string decodificar(string texto, HuffNode *raiz)
+{
     int i = 0;
     HuffNode *aux = raiz;
     string decodificado;
 
-    while(texto[i] != '\0'){
-        if(texto[i] == '0')
+    while (texto[i] != '\0')
+    {
+        if (texto[i] == '0')
             aux = aux->getLeft();
         else
             aux = aux->getRight();
 
-        if(aux->getLeft() == NULL && aux->getRight() == NULL){
+        if (aux->getLeft() == NULL && aux->getRight() == NULL)
+        {
             decodificado += aux->getKey();
             aux = raiz;
         }
@@ -158,7 +161,6 @@ string decodificar(string texto, HuffNode *raiz){
     cout << "decodificado" << decodificado << endl;
     return decodificado;
 }
-
 
 unsigned int eh_bit_um(unsigned char byte, int i)
 {
@@ -183,11 +185,11 @@ void descomprimeEscreveBin(HuffNode *raiz)
             {
                 if ((eh_bit_um(byte, i)))
                 {
-                    aux = aux->getRight();
+                    aux = aux->getLeft();
                 }
                 else
                 {
-                    aux = aux->getLeft();
+                    aux = aux->getRight();
                 }
                 if (aux->getLeft() == nullptr && aux->getRight() == nullptr)
                 {
@@ -214,7 +216,7 @@ void comprimeEscreveBin(string texto)
         for (int i = 0; i < texto.length(); i++)
         {
             mascara = 1;
-            if (texto[i] != '\0')
+            if (texto[i] != '0')
             {
                 mascara = mascara << j;
                 byte = byte | mascara;
@@ -264,11 +266,10 @@ void compressao()
         importacao(registers, n);
 
         unordered_map<char, int> frequencyMap;
+        string texto = copiaRegistrosParaString(registers, n);
+        // string texto = "This is my favourite app I enjoy this app I like this app\nIt's so good\nsuperb\n";
 
-        for (int j = 0; j < n; j++)
-        {
-            fillFrequency(&frequencyMap, registers[i]->getReview(), registers[i]->getReviewSize());
-        }
+        fillFrequency(&frequencyMap, texto);
 
         // Teste com valores do slide
         // for (int j = 0; j < 9; j++) {
@@ -283,12 +284,12 @@ void compressao()
         unordered_map<char, string> encodingTable;
 
         encondigStructures(&encodingTree, &encodingTable, &frequencyMap);
+
         // Copia as informações dos registros para uma string e desaloca
-        string texto = copiaRegistrosParaString(registers, n);
         deleteArray(registers, n);
 
         FILE *arquivo = fopen("reviewsDescomp.bin", "wb");
-        cout << texto <<endl;
+        cout << texto << endl;
         for (int i = 0; i < texto.length(); i++)
         {
             fwrite(&texto[i], sizeof(unsigned char), 1, arquivo);
@@ -299,12 +300,14 @@ void compressao()
         {
             aux += encodingTable[texto[i]];
         }
-        aux += '\0';
+        // aux += '\0';
 
         comprimeEscreveBin(aux);
         novoTexto = decodificar(aux, encodingTree);
-        cout << "texto decodificado:       " << novoTexto;
+        cout << "texto decodificado:       " << novoTexto << endl;
+        cout <<  endl <<"descomprimeEscreveBin(): " << endl;
         descomprimeEscreveBin(encodingTree);
+        cout << endl << "-" << endl;
 
         delete encodingTree;
     }
