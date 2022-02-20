@@ -127,10 +127,120 @@ void encondigStructures(HuffNode *encodingTree, unordered_map<char, string> *enc
     // }
 }
 
+string copiaRegistrosParaString(Register **registers, int tam)
+{
+    string texto;
+    for(int i = 0; i < tam; i++)
+    {
+        int *version = registers[i]->getVersion();
+        texto += registers[i]->getID();
+        texto += registers[i]->getUpvote();
+        texto += version[0] + version[1] + version[2];
+        texto += registers[i]->getDate();
+        texto += registers[i]->getReview();
+        texto += '\n';
+    }
+    return texto;
+}
+
+/*
+     Função para testar o bit i
+*/
+unsigned int eh_bit_um(unsigned char byte, int i){
+    unsigned char mascara = (1 << i);
+    return byte & mascara;
+}
+
+void descomprimeEscreveBin(HuffNode *raiz)
+{
+    FILE *arq = fopen("reviewsComp.bin", "rb");
+    /*
+     Função para ler o arquivo compactado e obter o texto original.
+*/
+    HuffNode *aux = raiz;
+    unsigned char byte;
+    int i;
+    cout << "Entrou na funcao e copiou a raiz" << endl;
+    if(arq){
+        cout << "Entruo no if arq" << endl;
+        // enquanto conseguir ler do arquivo
+        while(fread(&byte, sizeof(unsigned char), 1, arq)){
+            for(i = 7; i >= 0; i--){
+                cout << i << endl;
+                if((eh_bit_um(byte, i)))
+                {
+                    cout << aux->getCount() << "if" << endl;
+                    aux = aux->getRight();
+                    cout << aux->getCount() << "alou" << endl;
+                }
+                    
+                else
+                {
+                    cout << aux->getCount() << "else" << endl;
+                    aux = aux->getLeft();
+                    cout << aux->getCount() << endl;
+                }
+                cout << aux->getCount() << endl;
+                cout << "Entrou no for e passou pelo if" << endl;
+                if(aux->getLeft() == NULL && aux->getRight() == NULL){
+                    cout << aux->getCount() << endl;
+                    cout << "Entrou no ultimo if" << endl;
+                    cout << "foi" << endl;
+                    aux = raiz;
+                }
+                cout << "saiu do if" << endl;
+            }
+        }
+        fclose(arq);
+    }
+    else
+        printf("\nErro ao abrir arquivo em descompactar\n");
+}
+
+void comprimeEscreveBin(string texto)
+{
+    FILE *arq = fopen("reviewsComp.bin", "wb");
+    
+    if(arq)
+    {
+        int j = 7;
+        unsigned char mascara, byte = 0;
+        for(int i = 0; i < texto.length(); i++)
+        {
+            mascara = 1;
+            if(texto[i] != '\0')
+            {
+                mascara = mascara << j;
+                byte = byte | mascara;
+            }
+            j--;
+
+            if(j < 0)
+            {
+                fwrite(&byte, sizeof(unsigned char), 1, arq);
+                byte = 0;
+                j = 7;
+            }
+        }
+        if(j != 7) // tem um byte em formação
+        {
+            fwrite(&byte, sizeof(unsigned char), 1, arq);
+        }
+        fclose(arq);
+        cout << "Texto 01" << endl;
+        cout << texto << endl;
+    }
+
+    else
+    {
+        cout << "Nao foi possivel criar o arquivo binario" << endl;
+    }
+}
+
 void compressao()
 {
     // const int SIZES[] = {10000, 100000, 1000000};
-    const int SIZES[] = {10, 20, 30};
+    const int SIZES[] = {10, 20, 3};
     int n;
     Register **registers;
 
@@ -140,7 +250,7 @@ void compressao()
     // char arr[] = {'A', 'C', 'E', 'D', 'T', 'O', 'B', 'F', 'G'};
     // int freq[] = {220, 78, 112, 50, 12, 66, 180, 95, 34};
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 2; i < 3; i++)
     {
         n = SIZES[i];
 
@@ -163,12 +273,31 @@ void compressao()
         // }
         // cout << endl;
 
-        HuffNode encodingTree;
+        HuffNode *encodingTree;
         unordered_map<char, string> encodingTable;
 
-        encondigStructures(&encodingTree, &encodingTable, &frequencyMap);
-
+        encondigStructures(encodingTree, &encodingTable, &frequencyMap);
+        //Copia as informações dos registros para uma string e desaloca 
+        string texto = copiaRegistrosParaString(registers, n);
         deleteArray(registers, n);
+
+            FILE *arquivo = fopen("reviewsDescomp.bin", "wb");
+
+            for(int i = 0; i < texto.length(); i++)
+            {
+                fwrite(&texto[i],sizeof(unsigned char), 1, arquivo);
+            }
+            fclose(arquivo);
+        string aux;
+        for(int i = 0; i < texto.length(); i++)
+        {
+            aux += encodingTable[texto[i]];
+        }
+
+        comprimeEscreveBin(aux);
+        descomprimeEscreveBin(encodingTree);
+
+        
     }
 }
 

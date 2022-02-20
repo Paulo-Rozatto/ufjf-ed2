@@ -30,6 +30,7 @@ public:
     int getIndex() { return index; };
     char *getReview() { return review; };
     int getReviewSize() { return reviewSize; };
+    char *getDate() { return date; };
     void setUpvote(int value) { this->upvote = value; };
 };
 #endif
