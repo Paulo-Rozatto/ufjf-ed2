@@ -132,20 +132,34 @@ string copiaRegistrosParaString(Register **registers, int tam)
     string texto;
     for (int i = 0; i < tam; i++)
     {
-        int *version = registers[i]->getVersion();
-        texto += registers[i]->getID();
-        texto += registers[i]->getUpvote();
-        texto += version[0] + version[1] + version[2];
-        texto += registers[i]->getDate();
         texto += registers[i]->getReview();
         texto += '\n';
     }
     return texto;
 }
 
-/*
-     Função para testar o bit i
-*/
+string decodificar(string texto, HuffNode *raiz){
+    int i = 0;
+    HuffNode *aux = raiz;
+    string decodificado;
+
+    while(texto[i] != '\0'){
+        if(texto[i] == '0')
+            aux = aux->getLeft();
+        else
+            aux = aux->getRight();
+
+        if(aux->getLeft() == NULL && aux->getRight() == NULL){
+            decodificado += aux->getKey();
+            aux = raiz;
+        }
+        i++;
+    }
+    cout << "decodificado" << decodificado << endl;
+    return decodificado;
+}
+
+
 unsigned int eh_bit_um(unsigned char byte, int i)
 {
     unsigned char mascara = (1 << i);
@@ -155,45 +169,32 @@ unsigned int eh_bit_um(unsigned char byte, int i)
 void descomprimeEscreveBin(HuffNode *raiz)
 {
     FILE *arq = fopen("reviewsComp.bin", "rb");
-    /*
-     Função para ler o arquivo compactado e obter o texto original.
-*/
+    ofstream outFile("saida.txt");
     HuffNode *aux = raiz;
     unsigned char byte;
     int i;
-    cout << "Entrou na funcao e copiou a raiz" << endl;
     if (arq)
     {
-        cout << "Entruo no if arq" << endl;
         // enquanto conseguir ler do arquivo
-        while (fread(&byte, sizeof(unsigned char), 1, arq))
+        while (!feof(arq))
         {
+            fread(&byte, sizeof(unsigned char), 1, arq);
             for (i = 7; i >= 0; i--)
             {
-                cout << i << endl;
                 if ((eh_bit_um(byte, i)))
                 {
-                    cout << aux->getCount() << "if" << endl;
                     aux = aux->getRight();
-                    cout << aux->getCount() << "alou" << endl;
                 }
-
                 else
                 {
-                    cout << aux->getCount() << "else" << endl;
                     aux = aux->getLeft();
-                    cout << aux->getCount() << endl;
                 }
-                cout << aux->getCount() << endl;
-                cout << "Entrou no for e passou pelo if" << endl;
-                if (aux->getLeft() == NULL && aux->getRight() == NULL)
+                if (aux->getLeft() == nullptr && aux->getRight() == nullptr)
                 {
-                    cout << aux->getCount() << endl;
-                    cout << "Entrou no ultimo if" << endl;
-                    cout << "foi" << endl;
+                    cout << aux->getKey();
+                    outFile << aux->getKey();
                     aux = raiz;
                 }
-                cout << "saiu do if" << endl;
             }
         }
         fclose(arq);
@@ -287,19 +288,22 @@ void compressao()
         deleteArray(registers, n);
 
         FILE *arquivo = fopen("reviewsDescomp.bin", "wb");
-
+        cout << texto <<endl;
         for (int i = 0; i < texto.length(); i++)
         {
             fwrite(&texto[i], sizeof(unsigned char), 1, arquivo);
         }
         fclose(arquivo);
-        string aux;
+        string aux, novoTexto;
         for (int i = 0; i < texto.length(); i++)
         {
             aux += encodingTable[texto[i]];
         }
+        aux += '\0';
 
         comprimeEscreveBin(aux);
+        novoTexto = decodificar(aux, encodingTree);
+        cout << "texto decodificado:       " << novoTexto;
         descomprimeEscreveBin(encodingTree);
 
         delete encodingTree;
