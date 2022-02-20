@@ -121,10 +121,10 @@ void encondigStructures(HuffNode **encodingTree, unordered_map<char, string> *en
     fillTable(*encodingTree, "", encodingTable);
 
     // Descomentar para mostrar tabela de codificacao
-    for (pair<char, string> p : (*encodingTable))
-    {
-        cout << p.first << ": " << p.second << endl;
-    }
+    // for (pair<char, string> p : (*encodingTable))
+    // {
+    //     cout << p.first << ": " << p.second << endl;
+    // }
 }
 
 string copiaRegistrosParaString(Register **registers, int tam)
@@ -147,9 +147,9 @@ string decodificar(string texto, HuffNode *raiz)
     while (texto[i] != '\0')
     {
         if (texto[i] == '0')
-            aux = aux->getLeft();
-        else
             aux = aux->getRight();
+        else
+            aux = aux->getLeft();
 
         if (aux->getLeft() == NULL && aux->getRight() == NULL)
         {
@@ -158,7 +158,6 @@ string decodificar(string texto, HuffNode *raiz)
         }
         i++;
     }
-    cout << "decodificado" << decodificado << endl;
     return decodificado;
 }
 
@@ -171,10 +170,12 @@ unsigned int eh_bit_um(unsigned char byte, int i)
 void descomprimeEscreveBin(HuffNode *raiz)
 {
     FILE *arq = fopen("reviewsComp.bin", "rb");
+    FILE *arquivo = fopen("reviewsOrig.bin", "wb");
     ofstream outFile("saida.txt");
     HuffNode *aux = raiz;
-    unsigned char byte;
+    unsigned char byte, auxChar;
     int i;
+    string texto;
     if (arq)
     {
         // enquanto conseguir ler do arquivo
@@ -193,8 +194,9 @@ void descomprimeEscreveBin(HuffNode *raiz)
                 }
                 if (aux->getLeft() == nullptr && aux->getRight() == nullptr)
                 {
-                    cout << aux->getKey();
-                    outFile << aux->getKey();
+                    //cout << aux->getKey();
+                    auxChar = aux->getKey();
+                    fwrite(&auxChar, sizeof(unsigned char), 1, arquivo);
                     aux = raiz;
                 }
             }
@@ -202,7 +204,7 @@ void descomprimeEscreveBin(HuffNode *raiz)
         fclose(arq);
     }
     else
-        printf("\nErro ao abrir arquivo em descompactar\n");
+        printf("\nErro ao abrir arquivo em decomprime\n");
 }
 
 void comprimeEscreveBin(string texto)
@@ -235,8 +237,8 @@ void comprimeEscreveBin(string texto)
             fwrite(&byte, sizeof(unsigned char), 1, arq);
         }
         fclose(arq);
-        cout << "Texto 01" << endl;
-        cout << texto << endl;
+        // cout << "Texto 01" << endl;
+        // cout << texto << endl;
     }
 
     else
@@ -245,10 +247,62 @@ void comprimeEscreveBin(string texto)
     }
 }
 
+void compressaoNEscolhas()
+{
+        int n;
+        Register **registers;
+        cout << "Informe o numero N de reviews" << endl;
+        cin >> n;
+        registers = createArray(n);
+        importacao(registers, n);
+
+        unordered_map<char, int> frequencyMap;
+        string texto = copiaRegistrosParaString(registers, n);
+        // string texto = "This is my favourite app I enjoy this app I like this app\nIt's so good\nsuperb\n";
+        fillFrequency(&frequencyMap, texto);
+
+        // Teste com valores do slide
+        // for (int j = 0; j < 9; j++) {
+        //     frequencyMap.insert(make_pair(arr[j], freq[j]));
+        // }
+        // for(auto p: frequencyMap) {
+        //     cout << p.first << " - " << p.second << endl;
+        // }
+        // cout << endl;
+
+        HuffNode *encodingTree;
+        unordered_map<char, string> encodingTable;
+
+        encondigStructures(&encodingTree, &encodingTable, &frequencyMap);
+
+        // Copia as informações dos registros para uma string e desaloca
+        deleteArray(registers, n);
+
+        // FILE *arquivo = fopen("reviewsDescomp.bin", "wb");
+        // //cout << texto << endl;
+        // for (int i = 0; i < texto.length(); i++)
+        // {
+        //     fwrite(&texto[i], sizeof(unsigned char), 1, arquivo);
+        // }
+        // fclose(arquivo);
+        string aux, novoTexto;
+        for (int i = 0; i < texto.length(); i++)
+        {
+            aux += encodingTable[texto[i]];
+        }
+
+        comprimeEscreveBin(aux);
+        //cout << "texto decodificado:       " << novoTexto << endl;
+        //cout <<  endl <<"descomprimeEscreveBin(): " << endl;
+        //cout << endl << "-" << endl;
+
+        delete encodingTree;
+}
+
 void compressao()
 {
-    // const int SIZES[] = {10000, 100000, 1000000};
-    const int SIZES[] = {10, 20, 3};
+     const int SIZES[] = {10000, 100000, 1000000};
+    // const int SIZES[] = {10, 20, 3};
     int n;
     Register **registers;
 
@@ -258,7 +312,7 @@ void compressao()
     // char arr[] = {'A', 'C', 'E', 'D', 'T', 'O', 'B', 'F', 'G'};
     // int freq[] = {220, 78, 112, 50, 12, 66, 180, 95, 34};
 
-    for (int i = 2; i < 3; i++)
+    for (int i = 0; i < 3; i++)
     {
         n = SIZES[i];
 
@@ -288,26 +342,25 @@ void compressao()
         // Copia as informações dos registros para uma string e desaloca
         deleteArray(registers, n);
 
-        FILE *arquivo = fopen("reviewsDescomp.bin", "wb");
-        cout << texto << endl;
-        for (int i = 0; i < texto.length(); i++)
-        {
-            fwrite(&texto[i], sizeof(unsigned char), 1, arquivo);
-        }
-        fclose(arquivo);
+        // FILE *arquivo = fopen("reviewsDescomp.bin", "wb");
+        // //cout << texto << endl;
+        // for (int i = 0; i < texto.length(); i++)
+        // {
+        //     fwrite(&texto[i], sizeof(unsigned char), 1, arquivo);
+        // }
+        // fclose(arquivo);
         string aux, novoTexto;
         for (int i = 0; i < texto.length(); i++)
         {
             aux += encodingTable[texto[i]];
         }
-        // aux += '\0';
 
         comprimeEscreveBin(aux);
         novoTexto = decodificar(aux, encodingTree);
-        cout << "texto decodificado:       " << novoTexto << endl;
-        cout <<  endl <<"descomprimeEscreveBin(): " << endl;
-        descomprimeEscreveBin(encodingTree);
-        cout << endl << "-" << endl;
+        //cout << "texto decodificado:       " << novoTexto << endl;
+        //cout <<  endl <<"descomprimeEscreveBin(): " << endl;
+        //descomprimeEscreveBin(encodingTree);
+        //cout << endl << "-" << endl;
 
         delete encodingTree;
     }
@@ -356,7 +409,7 @@ int main(int argc, char const *argv[])
         cout << "Menu: " << endl
              << "1 - Comprimir N reviews aleatorios " << endl
              << "2 - Descomprimir reviewsComp.bin" << endl
-
+             << "3 - Executar sequencia de N compreesoes(10000, 100000, 1000000"
              << "0 - Sair" << endl
              << "Digite a opcao: ";
 
@@ -368,13 +421,17 @@ int main(int argc, char const *argv[])
             break;
         case '1':
         {
-            compressao();
+            compressaoNEscolhas();
             break;
         }
         case '2':
         {
-            // descompressao
+            descomprimeEscreveBin();
             break;
+        }
+        case '3':
+        {
+            compressao();
         }
         default:
             cout << "Opcao invalida" << endl;
