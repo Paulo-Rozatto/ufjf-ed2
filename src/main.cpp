@@ -8,52 +8,14 @@
 #include <unordered_map>
 
 #include "FileProcessing.hpp"
+#include "ImportHelper.hpp"
 #include "MinHeap.hpp"
 
 using namespace std;
 
-void importacao(Register **registers, int n)
-{
-    fstream bin;
-    vector<int> indices(n);
-
-    bin.open("tiktok_app_reviews.bin", ios::in | ios::binary);
-
-    srand(time(NULL));
-
-    cout << "Escolhendo " << n << " registros aleatoriamente..." << endl;
-
-    for (int i = 0; i < n; i++)
-        indices[i] = rand() % ROWS;
-
-    sort(indices.begin(), indices.end());
-
-    for (int i = 0; i < n; i++)
-        registers[i]->init(bin, indices[i]);
-
-    cout << "Registros escolhidos!" << endl
-         << endl;
-}
-
-Register **createArray(int n)
-{
-    Register **v;
-
-    v = new Register *[n];
-    for (int i = 0; i < n; i++)
-        v[i] = new Register();
-
-    return v;
-}
-
-void deleteArray(Register **v, int n)
-{
-    for (int i = 0; i < n; i++)
-        delete v[i];
-
-    delete[] v;
-}
-
+/**
+ * Dada uma string, conta a frequencia de cada caracter usando o map(hash table)
+ */
 void fillFrequency(unordered_map<char, int> *frequencyMap, string str)
 {
     unordered_map<char, int>::iterator it;
@@ -70,6 +32,9 @@ void fillFrequency(unordered_map<char, int> *frequencyMap, string str)
     }
 }
 
+/**
+ * A partir da arvore de compressao, associa cada caracere com seu codigo binario
+ */
 void fillTable(HuffNode *node, string code, unordered_map<char, string> *encodingTable)
 {
     if (node == nullptr)
@@ -86,6 +51,9 @@ void fillTable(HuffNode *node, string code, unordered_map<char, string> *encodin
     }
 }
 
+/**
+ * Constroi heap, entao a arvore de codificacao e chama a construcao do tabela feita no metodo acima
+ */
 void encondigStructures(HuffNode **encodingTree, unordered_map<char, string> *encodingTable, unordered_map<char, int> *frequencyMap)
 {
     MinHeap heap;
@@ -119,12 +87,6 @@ void encondigStructures(HuffNode **encodingTree, unordered_map<char, string> *en
 
     // Usa a arvore para criar uma hash table com os codigos binarios para codificacao
     fillTable(*encodingTree, "", encodingTable);
-
-    // Descomentar para mostrar tabela de codificacao
-    // for (pair<char, string> p : (*encodingTable))
-    // {
-    //     cout << p.first << ": " << p.second << endl;
-    // }
 }
 
 string copiaRegistrosParaString(Register **registers, int tam)
@@ -194,7 +156,7 @@ void descomprimeEscreveBin(HuffNode *raiz)
                 }
                 if (aux->getLeft() == nullptr && aux->getRight() == nullptr)
                 {
-                    //cout << aux->getKey();
+                    // cout << aux->getKey();
                     auxChar = aux->getKey();
                     fwrite(&auxChar, sizeof(unsigned char), 1, arquivo);
                     aux = raiz;
@@ -237,8 +199,6 @@ void comprimeEscreveBin(string texto)
             fwrite(&byte, sizeof(unsigned char), 1, arq);
         }
         fclose(arq);
-        // cout << "Texto 01" << endl;
-        // cout << texto << endl;
     }
 
     else
@@ -249,68 +209,41 @@ void comprimeEscreveBin(string texto)
 
 void compressaoNEscolhas()
 {
-        int n;
-        Register **registers;
-        cout << "Informe o numero N de reviews" << endl;
-        cin >> n;
-        registers = createArray(n);
-        importacao(registers, n);
+    int n;
+    Register **registers;
+    cout << "Informe o numero N de reviews" << endl;
+    cin >> n;
+    registers = createArray(n);
+    importacao(registers, n);
 
-        unordered_map<char, int> frequencyMap;
-        string texto = copiaRegistrosParaString(registers, n);
-        // string texto = "This is my favourite app I enjoy this app I like this app\nIt's so good\nsuperb\n";
-        fillFrequency(&frequencyMap, texto);
+    unordered_map<char, int> frequencyMap;
+    string texto = copiaRegistrosParaString(registers, n);
+    fillFrequency(&frequencyMap, texto);
 
-        // Teste com valores do slide
-        // for (int j = 0; j < 9; j++) {
-        //     frequencyMap.insert(make_pair(arr[j], freq[j]));
-        // }
-        // for(auto p: frequencyMap) {
-        //     cout << p.first << " - " << p.second << endl;
-        // }
-        // cout << endl;
+    HuffNode *encodingTree;
+    unordered_map<char, string> encodingTable;
 
-        HuffNode *encodingTree;
-        unordered_map<char, string> encodingTable;
+    encondigStructures(&encodingTree, &encodingTable, &frequencyMap);
 
-        encondigStructures(&encodingTree, &encodingTable, &frequencyMap);
+    // Copia as informações dos registros para uma string e desaloca
+    deleteArray(registers, n);
 
-        // Copia as informações dos registros para uma string e desaloca
-        deleteArray(registers, n);
+    string aux, novoTexto;
+    for (int i = 0; i < texto.length(); i++)
+    {
+        aux += encodingTable[texto[i]];
+    }
 
-        // FILE *arquivo = fopen("reviewsDescomp.bin", "wb");
-        // //cout << texto << endl;
-        // for (int i = 0; i < texto.length(); i++)
-        // {
-        //     fwrite(&texto[i], sizeof(unsigned char), 1, arquivo);
-        // }
-        // fclose(arquivo);
-        string aux, novoTexto;
-        for (int i = 0; i < texto.length(); i++)
-        {
-            aux += encodingTable[texto[i]];
-        }
+    comprimeEscreveBin(aux);
 
-        comprimeEscreveBin(aux);
-        //cout << "texto decodificado:       " << novoTexto << endl;
-        //cout <<  endl <<"descomprimeEscreveBin(): " << endl;
-        //cout << endl << "-" << endl;
-
-        delete encodingTree;
+    delete encodingTree;
 }
 
 void compressao()
 {
-     const int SIZES[] = {10000, 100000, 1000000};
-    // const int SIZES[] = {10, 20, 3};
+    const int SIZES[] = {10000, 100000, 1000000};
     int n;
     Register **registers;
-
-    // Teste com valores do slide
-    // A   C   E   D   T   O   B    F  G
-    // 220 78  112 50  12  66  180  95 34
-    // char arr[] = {'A', 'C', 'E', 'D', 'T', 'O', 'B', 'F', 'G'};
-    // int freq[] = {220, 78, 112, 50, 12, 66, 180, 95, 34};
 
     for (int i = 0; i < 3; i++)
     {
@@ -321,18 +254,8 @@ void compressao()
 
         unordered_map<char, int> frequencyMap;
         string texto = copiaRegistrosParaString(registers, n);
-        // string texto = "This is my favourite app I enjoy this app I like this app\nIt's so good\nsuperb\n";
 
         fillFrequency(&frequencyMap, texto);
-
-        // Teste com valores do slide
-        // for (int j = 0; j < 9; j++) {
-        //     frequencyMap.insert(make_pair(arr[j], freq[j]));
-        // }
-        // for(auto p: frequencyMap) {
-        //     cout << p.first << " - " << p.second << endl;
-        // }
-        // cout << endl;
 
         HuffNode *encodingTree;
         unordered_map<char, string> encodingTable;
@@ -342,13 +265,6 @@ void compressao()
         // Copia as informações dos registros para uma string e desaloca
         deleteArray(registers, n);
 
-        // FILE *arquivo = fopen("reviewsDescomp.bin", "wb");
-        // //cout << texto << endl;
-        // for (int i = 0; i < texto.length(); i++)
-        // {
-        //     fwrite(&texto[i], sizeof(unsigned char), 1, arquivo);
-        // }
-        // fclose(arquivo);
         string aux, novoTexto;
         for (int i = 0; i < texto.length(); i++)
         {
@@ -357,10 +273,7 @@ void compressao()
 
         comprimeEscreveBin(aux);
         novoTexto = decodificar(aux, encodingTree);
-        //cout << "texto decodificado:       " << novoTexto << endl;
-        //cout <<  endl <<"descomprimeEscreveBin(): " << endl;
         descomprimeEscreveBin(encodingTree);
-        //cout << endl << "-" << endl;
 
         delete encodingTree;
     }
@@ -408,7 +321,7 @@ int main(int argc, char const *argv[])
     {
         cout << "Menu: " << endl
              << "1 - Comprimir N reviews aleatorios " << endl
-             << "3 - Executar sequencia de N compreesoes(10000, 100000, 1000000"
+             << "2 - Executar sequencia de N compreesoes(10000, 100000, 1000000" << endl
              << "0 - Sair" << endl
              << "Digite a opcao: ";
 
@@ -425,7 +338,7 @@ int main(int argc, char const *argv[])
         }
         case '2':
         {
-            //descomprimeEscreveBin();
+            // descomprimeEscreveBin();
             break;
         }
         case '3':
