@@ -236,6 +236,14 @@ void compressaoNEscolhas()
 
     comprimeEscreveBin(aux);
 
+    ifstream file("reviewsComp.bin", ios::ate | ios::binary);
+    int originalSize = texto.length() * sizeof(char);
+    int compressedSize = file.tellg();
+
+    cout << "Tamanho original: " << originalSize << " bytes" << endl;
+    cout << "Tamanho comprimido: " << compressedSize << " bytes" << endl;
+    cout << "Taxa compressao: " << (originalSize - compressedSize) / (float)originalSize * 100 << "%" << endl;
+
     delete encodingTree;
 }
 
@@ -274,6 +282,14 @@ void compressao()
         comprimeEscreveBin(aux);
         novoTexto = decodificar(aux, encodingTree);
         descomprimeEscreveBin(encodingTree);
+
+        ifstream file("reviewsComp.bin", ios::ate | ios::binary);
+        int originalSize = texto.length() * sizeof(char);
+        int compressedSize = file.tellg();
+
+        cout << "Tamanho original: " << originalSize << " bytes" << endl;
+        cout << "Tamanho comprimido: " << compressedSize << " bytes" << endl;
+        cout << "Taxa compressao: " << (originalSize - compressedSize) / (float)originalSize * 100 << "%" << endl;
 
         delete encodingTree;
     }
@@ -337,11 +353,6 @@ int main(int argc, char const *argv[])
             break;
         }
         case '2':
-        {
-            // descomprimeEscreveBin();
-            break;
-        }
-        case '3':
         {
             compressao();
         }
