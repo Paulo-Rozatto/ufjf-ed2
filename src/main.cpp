@@ -359,7 +359,7 @@ void compressao()
         novoTexto = decodificar(aux, encodingTree);
         //cout << "texto decodificado:       " << novoTexto << endl;
         //cout <<  endl <<"descomprimeEscreveBin(): " << endl;
-        //descomprimeEscreveBin(encodingTree);
+        descomprimeEscreveBin(encodingTree);
         //cout << endl << "-" << endl;
 
         delete encodingTree;
@@ -408,7 +408,6 @@ int main(int argc, char const *argv[])
     {
         cout << "Menu: " << endl
              << "1 - Comprimir N reviews aleatorios " << endl
-             << "2 - Descomprimir reviewsComp.bin" << endl
              << "3 - Executar sequencia de N compreesoes(10000, 100000, 1000000"
              << "0 - Sair" << endl
              << "Digite a opcao: ";
@@ -426,7 +425,7 @@ int main(int argc, char const *argv[])
         }
         case '2':
         {
-            descomprimeEscreveBin();
+            //descomprimeEscreveBin();
             break;
         }
         case '3':
